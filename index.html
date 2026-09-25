@@ -79,20 +79,20 @@ const shots=[
 ];
 
 const segments=[
- {file:'01_twenty_years.mp3',shot:0,rate:.94,gap:1.25,cls:'left narration',html:'二十年……<br>可以改变多少事。'},
- {file:'02_river.mp3',shot:0,rate:.95,gap:1.25,cls:'left narration',html:'一个人，从少年走到暮色。<br>一座城，换了人间。<span class="whisper">可江水……仍旧这样流。</span>'},
- {file:'03_reeds.mp3',shot:1,rate:.94,gap:1.15,cls:'center poem',html:'芦叶满汀洲，<br>寒沙带浅流。'},
- {file:'04_south_tower.mp3',shot:2,rate:.93,gap:1.35,cls:'right poem vertical',html:'二十年重过南楼。'},
- {file:'05_willow.mp3',shot:3,rate:.94,gap:1.3,cls:'center poem',html:'柳下系船犹未稳，<br>能几日，又中秋。'},
- {file:'06_return.mp3',shot:4,rate:.95,gap:1.15,cls:'left narration',html:'我们总以为，回到旧地，<br>就能把从前，也一并找回来。'},
- {file:'07_truth.mp3',shot:4,rate:.94,gap:1.5,cls:'right narration',html:'后来才知道——<br>故地，可以重游。<span class="whisper">故人……却未必还在。</span>'},
- {file:'08_rock.mp3',shot:5,rate:.93,gap:1.0,cls:'left poem vertical',html:'黄鹤断矶头。'},
- {file:'09_oldfriend.mp3',shot:5,rate:.91,gap:1.55,cls:'center poem',html:'故人……今在否？'},
- {file:'10_new_sorrow.mp3',shot:6,rate:.94,gap:1.3,cls:'right poem vertical',html:'旧江山浑是新愁。'},
- {file:'11_wine.mp3',shot:7,rate:.93,gap:1.7,cls:'center poem',html:'欲买桂花同载酒。'},
- {file:'12_not_same.mp3',shot:8,rate:.89,gap:2.1,cls:'center poem',html:'终不似……'},
- {file:'13_youth.mp3',shot:9,rate:.88,gap:2.5,cls:'center poem',html:'少年游。'},
- {file:'14_epilogue.mp3',shot:10,rate:.94,gap:4.0,cls:'center narration',html:'场景还在。<br>人生……却早已走远了。'}
+ {file:'01_twenty_years.mp3',shot:0,rate:1,gap:1.25,cls:'left narration',html:'二十年……<br>可以改变多少事。'},
+ {file:'02_river.mp3',shot:0,rate:1,gap:1.25,cls:'left narration',html:'一个人，从少年走到暮色。<br>一座城，换了人间。<span class="whisper">可江水……仍旧这样流。</span>'},
+ {file:'03_reeds.mp3',shot:1,rate:1,gap:1.15,cls:'center poem',html:'芦叶满汀洲，<br>寒沙带浅流。'},
+ {file:'04_south_tower.mp3',shot:2,rate:1,gap:1.35,cls:'right poem vertical',html:'二十年重过南楼。'},
+ {file:'05_willow.mp3',shot:3,rate:1,gap:1.3,cls:'center poem',html:'柳下系船犹未稳，<br>能几日，又中秋。'},
+ {file:'06_return.mp3',shot:4,rate:1,gap:1.15,cls:'left narration',html:'我们总以为，回到旧地，<br>就能把从前，也一并找回来。'},
+ {file:'07_truth.mp3',shot:4,rate:1,gap:1.5,cls:'right narration',html:'后来才知道——<br>故地，可以重游。<span class="whisper">故人……却未必还在。</span>'},
+ {file:'08_rock.mp3',shot:5,rate:1,gap:1.0,cls:'left poem vertical',html:'黄鹤断矶头。'},
+ {file:'09_oldfriend.mp3',shot:5,rate:1,gap:1.55,cls:'center poem',html:'故人……今在否？'},
+ {file:'10_new_sorrow.mp3',shot:6,rate:1,gap:1.3,cls:'right poem vertical',html:'旧江山浑是新愁。'},
+ {file:'11_wine.mp3',shot:7,rate:1,gap:1.7,cls:'center poem',html:'欲买桂花同载酒。'},
+ {file:'12_not_same.mp3',shot:8,rate:1,gap:2.1,cls:'center poem',html:'终不似……'},
+ {file:'13_youth.mp3',shot:9,rate:1,gap:2.5,cls:'center poem',html:'少年游。'},
+ {file:'14_epilogue.mp3',shot:10,rate:1,gap:4.0,cls:'center narration',html:'场景还在。<br>人生……却早已走远了。'}
 ];
 const voices=segments.map(s=>{const a=new Audio('assets/audio/'+s.file);a.preload='auto';a.playsInline=true;a.preservesPitch=true;a.volume=.98;return a});
 const music={intro:new Audio('assets/audio/bgm_intro.mp3'),memory:new Audio('assets/audio/bgm_memory.mp3'),rise:new Audio('assets/audio/bgm_rise.mp3')};

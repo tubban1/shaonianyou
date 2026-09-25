@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b0d"><title>少年游 · 唐多令</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070a0c;color:#eee;font-family:"Songti SC","STSong","Noto Serif SC",serif}body{touch-action:manipulation}
+canvas{position:fixed;inset:0;width:100%;height:100%}.veil{position:fixed;inset:0;background:radial-gradient(circle at 50% 42%,transparent 15%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.7) 120%);pointer-events:none}
+.grain{position:fixed;inset:0;opacity:.06;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E")}
+#intro{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#1d2425,#07090a 72%);z-index:8;transition:opacity 1.8s}
+.introbox{text-align:center;padding:28px}.seal{font-size:11px;letter-spacing:.42em;color:#a99779;margin-bottom:26px}.title{font-size:clamp(42px,8vw,88px);font-weight:400;letter-spacing:.18em;margin-right:-.18em}.author{margin-top:15px;color:#a9aaa5;letter-spacing:.45em;font-size:13px}.enter{margin-top:54px;border:1px solid rgba(220,210,185,.34);background:rgba(255,255,255,.025);color:#d7d0bf;border-radius:99px;padding:12px 27px;letter-spacing:.25em;cursor:pointer}.enter:hover{background:rgba(255,255,255,.07)}
+#words{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;padding:9vw;z-index:4}.card{text-align:center;max-width:920px;text-shadow:0 2px 18px #000;opacity:0;transform:translateY(12px);transition:opacity 1.8s,transform 1.8s}.card.show{opacity:1;transform:none}.poem{font-size:clamp(28px,5vw,58px);letter-spacing:.16em;line-height:1.8}.prose{font-size:clamp(18px,2.6vw,31px);letter-spacing:.12em;line-height:1.9;color:#d7d4ca}.small{display:block;margin-top:16px;font-size:12px;color:#9a978e;letter-spacing:.3em}
+#progress{position:fixed;left:0;bottom:0;height:1px;background:#c7b58c;width:0;z-index:6;opacity:.7}
+#sound{position:fixed;right:18px;top:18px;z-index:7;color:#aaa;font:12px sans-serif;letter-spacing:.1em;opacity:.6}
+</style></head>
+<body>
+<canvas id="c"></canvas><div class="veil"></div><div class="grain"></div>
+<div id="intro"><div class="introbox"><div class="seal">南宋 · 刘过</div><div class="title">少年游</div><div class="author">唐多令 · 芦叶满汀洲</div><button class="enter" id="enter">入 画</button></div></div>
+<div id="words"><div class="card" id="card"></div></div><div id="progress"></div><div id="sound">江声 · 风 · 古琴意象</div>
+<script>
+const cv=document.querySelector('#c'),ctx=cv.getContext('2d'),card=document.querySelector('#card'),intro=document.querySelector('#intro'),progress=document.querySelector('#progress');
+let W,H,dpr,t0=0,started=false,wind=0;
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+const reeds=Array.from({length:95},(_,i)=>({x:Math.random()*W,y:H*(.62+Math.random()*.32),h:45+Math.random()*150,a:.18+Math.random()*.42,s:Math.random()*6.28}));
+const stars=Array.from({length:45},()=>({x:Math.random(),y:Math.random()*.46,a:Math.random()*.5}));
+function scene(ms){let t=ms*.001;ctx.clearRect(0,0,W,H);
+let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#10191c');g.addColorStop(.52,'#263033');g.addColorStop(.53,'#171d1e');g.addColorStop(1,'#080c0d');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+stars.forEach(s=>{ctx.fillStyle='rgba(225,222,205,'+(s.a*.25)+')';ctx.fillRect(s.x*W,s.y*H,1,1)});
+let moonX=W*.72,moonY=H*.22,r=Math.min(W,H)*.07;let mg=ctx.createRadialGradient(moonX,moonY,0,moonX,moonY,r*2.4);mg.addColorStop(0,'rgba(236,229,199,.82)');mg.addColorStop(.34,'rgba(218,213,190,.3)');mg.addColorStop(1,'rgba(218,213,190,0)');ctx.fillStyle=mg;ctx.beginPath();ctx.arc(moonX,moonY,r*2.4,0,7);ctx.fill();ctx.fillStyle='rgba(229,223,198,.72)';ctx.beginPath();ctx.arc(moonX,moonY,r,0,7);ctx.fill();
+ctx.fillStyle='#111719';ctx.beginPath();ctx.moveTo(0,H*.53);for(let x=0;x<=W;x+=W/8)ctx.lineTo(x,H*(.43+Math.sin(x*.009)*.035+Math.random()*.01));ctx.lineTo(W,H*.62);ctx.lineTo(0,H*.62);ctx.fill();
+for(let y=H*.55;y<H;y+=8){ctx.strokeStyle='rgba(165,177,170,'+(0.025+(y/H)*.035)+')';ctx.beginPath();for(let x=0;x<W;x+=22){let yy=y+Math.sin(x*.025+t*.65+y)*2;ctx.lineTo(x,yy)}ctx.stroke()}
+wind=Math.sin(t*.42)*.05;reeds.forEach(q=>{let x=q.x,y=q.y;ctx.strokeStyle='rgba(160,151,119,'+q.a+')';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.sin(t+q.s)*5,y-q.h*.5,x+Math.sin(t*.8+q.s)*11,y-q.h);ctx.stroke();ctx.fillStyle='rgba(171,159,122,'+(q.a*.8)+')';ctx.beginPath();ctx.ellipse(x+Math.sin(t*.8+q.s)*11,y-q.h,10,2.2,-.25+wind,0,7);ctx.fill()});
+let bx=W*(.32+Math.sin(t*.08)*.012),by=H*.69;ctx.fillStyle='rgba(3,5,5,.92)';ctx.beginPath();ctx.moveTo(bx-62,by);ctx.quadraticCurveTo(bx,by+19,bx+72,by);ctx.lineTo(bx+48,by+12);ctx.lineTo(bx-43,by+12);ctx.fill();ctx.strokeStyle='rgba(194,177,132,.25)';ctx.beginPath();ctx.moveTo(bx+7,by);ctx.lineTo(bx+7,by-63);ctx.stroke();
+requestAnimationFrame(scene)}requestAnimationFrame(scene);
+const cues=[
+[0,'prose','二十年，可以改变多少事？<br>一个人从少年走到暮色，<br>一座城换了人间。<br><span class="small">可江水，仍旧这样流。</span>'],
+[10,'poem','芦叶满汀洲，<br>寒沙带浅流。'],
+[18,'poem','二十年重过南楼。'],
+[25,'poem','柳下系船犹未稳，<br>能几日，又中秋。'],
+[35,'prose','我们以为重回故地，<br>便能遇见从前。<br><span class="small">后来才明白，故地可以重游，故人未必还在。</span>'],
+[46,'poem','黄鹤断矶头，<br>故人今在否？'],
+[55,'poem','旧江山浑是新愁。'],
+[63,'prose','酒还是可以买的。<br>桂花也依旧会开。<br><span class="small">可有些东西，一旦走过，便再也回不来了。</span>'],
+[74,'poem','欲买桂花同载酒，'],
+[81,'poem','终不似，'],
+[86,'poem','少年游。'],
+[94,'prose','场景可以复原，<br>人生不能复原。<span class="small">刘过 · 唐多令</span>']
+],duration=102;let cue=-1;
+function tick(ts){if(!started)return;let s=(ts-t0)/1000;progress.style.width=Math.min(100,s/duration*100)+'%';let n=-1;for(let i=0;i<cues.length;i++)if(s>=cues[i][0])n=i;if(n!==cue){cue=n;card.classList.remove('show');setTimeout(()=>{if(cue>=0){card.className='card '+cues[cue][1];card.innerHTML=cues[cue][2];requestAnimationFrame(()=>card.classList.add('show'))}},650)}if(s<duration)requestAnimationFrame(tick)}
+function audio(){
+let A=new (window.AudioContext||window.webkitAudioContext)(),master=A.createGain();master.gain.value=.18;master.connect(A.destination);
+let noise=A.createBuffer(1,A.sampleRate*2,A.sampleRate),d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);let src=A.createBufferSource();src.buffer=noise;src.loop=true;let f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=480;let ng=A.createGain();ng.gain.value=.055;src.connect(f).connect(ng).connect(master);src.start();
+[146.83,220,293.66].forEach((hz,j)=>{let o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=hz;g.gain.value=.012/(j+1);o.connect(g).connect(master);o.start();setInterval(()=>{let now=A.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(.003,now);g.gain.linearRampToValueAtTime(.018/(j+1),now+2);g.gain.exponentialRampToValueAtTime(.002,now+8)},12000+j*3900)});
+}
+document.querySelector('#enter').onclick=()=>{started=true;intro.style.opacity=0;setTimeout(()=>intro.remove(),1900);try{audio()}catch(e){}t0=performance.now();requestAnimationFrame(tick)};
+</script></body></html>

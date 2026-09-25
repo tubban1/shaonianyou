@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050708">
-<title>少年游 · 电影 3D 版</title>
+<title>少年游 · V6 Director Cut</title>
 <link rel="preload" as="audio" href="assets/v5/audio/narration.mp3">
 <link rel="preload" as="image" href="assets/v4/scenes/scene01.webp">
 <style>
@@ -68,48 +68,25 @@ h1{font-size:clamp(56px,9vw,110px);font-weight:400;letter-spacing:.21em;text-ind
 
 <script type="module">
 import * as THREE from './assets/v5/vendor/three.module.js';
+import {shots,captions,FILM_DURATION} from './assets/v6/timeline.js';
+import {Director} from './assets/v6/director.js';
 
 const canvas=document.querySelector('#webgl'),fallback=document.querySelector('#fallback'),intro=document.querySelector('#intro'),
 enter=document.querySelector('#enter'),loadState=document.querySelector('#loadState'),voice=document.querySelector('#voice'),
 score=document.querySelector('#score'),caption=document.querySelector('#caption'),chapter=document.querySelector('#chapter'),
 sound=document.querySelector('#sound'),progress=document.querySelector('#progress'),seal=document.querySelector('#seal'),
 fade=document.querySelector('#fade'),replay=document.querySelector('#replay');
+const TEST_MUTE=new URLSearchParams(location.search).get('mute')==='1';
 
 const images=Array.from({length:9},(_,i)=>'assets/v4/scenes/scene'+String(i+1).padStart(2,'0')+'.webp');
 const depths=Array.from({length:9},(_,i)=>'assets/v5/depth/depth'+String(i+1).padStart(2,'0')+'.webp');
 
-const cues=[
- {t:0,s:0,title:'江上初见',depth:1.05,cam:[[-.22,.06,7.65],[.18,.13,7.15]],fx:'mist'},
- {t:14.65,s:1,title:'芦洲寒水',depth:.95,cam:[[.19,.02,7.35],[-.16,.12,7.7]],fx:'reeds'},
- {t:20.34,s:2,title:'重过南楼',depth:.75,cam:[[-.18,.12,7.55],[.16,.05,7.05]],fx:'rain'},
- {t:23.54,s:3,title:'柳下系舟',depth:.62,cam:[[.18,.03,7.35],[-.13,.10,7.72]],fx:'willow'},
- {t:30.43,s:4,title:'旧梦回潮',depth:.58,cam:[[-.12,.06,7.5],[.11,.0,7.08]],fx:'petals'},
- {t:47.09,s:5,title:'黄鹤断矶',depth:.56,cam:[[-.16,.14,7.48],[.13,.02,7.22]],fx:'rain'},
- {t:53.41,s:6,title:'旧江山',depth:.52,cam:[[.18,.04,7.32],[-.13,.1,7.66]],fx:'mist'},
- {t:57.10,s:7,title:'桂花载酒',depth:.48,cam:[[-.09,.01,7.42],[.08,.06,7.12]],fx:'petals'},
- {t:61.10,s:8,title:'终不似',depth:.5,cam:[[.13,.09,7.45],[-.08,.02,7.82]],fx:'mist'}
-];
-const captions=[
- {a:0,b:3.10,text:'二十年……可以改变多少事。'},
- {a:3.94,b:13.57,text:'一个人，从少年，走到暮色。<br>一座城，换了人间。可江水……仍旧这样流。'},
- {a:14.65,b:19.27,text:'芦叶满汀洲，寒沙带浅流。',poem:1},
- {a:20.34,b:22.92,text:'二十年重过南楼。',poem:1},
- {a:23.54,b:29.38,text:'柳下系船犹未稳，<br>能几日，又中秋。',poem:1},
- {a:30.43,b:36.30,text:'我们总以为，回到旧地，<br>就能把从前……也一并找回来。'},
- {a:37.30,b:45.67,text:'后来才知道——故地，可以重游。<br>故人……却未必还在。'},
- {a:47.09,b:49.35,text:'黄鹤断矶头。',poem:1},
- {a:50.11,b:52.27,text:'故人……今在否？',poem:1},
- {a:53.41,b:56.42,text:'旧江山，浑是新愁。',poem:1},
- {a:57.10,b:60.22,text:'欲买桂花同载酒。',poem:1},
- {a:61.10,b:62.27,text:'终不似……',poem:1},
- {a:63.05,b:64.42,text:'少年游。',poem:1},
- {a:65.75,b:70.65,text:'场景还在。<br>人生……却早已走远了。'}
-];
 
-let renderer,scene,camera,group,meshA,meshB,front,back,currentScene=-1,transition=null,started=false,ended=false,muted=false,currentCaption=-1;
+let renderer,scene,camera,group,meshA,meshB,front,back,currentScene=-1,transition=null,started=false,ended=false,muted=TEST_MUTE,currentCaption=-1;
 let textures=[],depthTextures=[],water,rain,petals,reeds,willow,mists=[],clock=new THREE.Clock(),envCtx=null,envGain=null;
+let director,hemi,key,occluder,boat,lantern,occlusion=null,fogPulse=0;
 const texLoader=new THREE.TextureLoader();
-const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),ease=t=>t*t*(3-2*t),lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),ease=t=>t*t*(3-2*t);
 
 function loadTex(url,color=false){return new Promise((res,rej)=>texLoader.load(url,t=>{if(color)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;res(t)},undefined,rej))}
 async function preload(){
@@ -117,8 +94,18 @@ async function preload(){
   [textures,depthTextures]=await Promise.all([
    Promise.all(images.map(x=>loadTex(x,true))),Promise.all(depths.map(x=>loadTex(x,false)))
   ]);
-  loadState.textContent='3D 场景已就绪';enter.disabled=false;
+  loadState.textContent='Director Cut 已就绪';enter.disabled=false;
  }catch(e){console.error(e);loadState.textContent='3D 资源加载失败';fallback.style.display='block'}
+}
+
+function makeFilmMaterial(){
+ const vs='uniform sampler2D uDepth;uniform float uDepthScale;uniform float uDepthBias;varying vec2 vUv;void main(){vUv=uv;float d=texture2D(uDepth,uv).r;vec3 p=position;p.z+=(d*uDepthScale)+uDepthBias;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}';
+ const fs='uniform sampler2D uMap;uniform sampler2D uDepth;uniform float uOpacity;uniform float uFocus;uniform float uWarmth;uniform float uExposure;uniform vec2 uTexel;varying vec2 vUv;'+
+ 'vec3 sf(vec2 uv,float r){vec3 c=texture2D(uMap,uv).rgb*.28;c+=texture2D(uMap,uv+uTexel*vec2(r,0.)).rgb*.12;c+=texture2D(uMap,uv-uTexel*vec2(r,0.)).rgb*.12;c+=texture2D(uMap,uv+uTexel*vec2(0.,r)).rgb*.12;c+=texture2D(uMap,uv-uTexel*vec2(0.,r)).rgb*.12;c+=texture2D(uMap,uv+uTexel*vec2(r,r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(-r,r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(r,-r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(-r,-r)).rgb*.06;return c;}'+
+ 'void main(){float d=texture2D(uDepth,vUv).r;float coc=smoothstep(.055,.34,abs(d-uFocus));vec3 c=sf(vUv,1.0+coc*5.5);float y=dot(c,vec3(.299,.587,.114));c=mix(vec3(y),c,.93);c.r+=uWarmth*.115;c.g+=uWarmth*.028;c.b-=uWarmth*.105;c*=uExposure;gl_FragColor=vec4(c,uOpacity);}';
+ return new THREE.ShaderMaterial({transparent:true,depthWrite:false,depthTest:false,side:THREE.DoubleSide,
+  uniforms:{uMap:{value:null},uDepth:{value:null},uDepthScale:{value:.7},uDepthBias:{value:-.25},uOpacity:{value:0},uFocus:{value:.55},uWarmth:{value:0},uExposure:{value:1},uTexel:{value:new THREE.Vector2(1/1600,1/900)}},
+  vertexShader:vs,fragmentShader:fs});
 }
 
 function init3D(){
@@ -129,12 +116,11 @@ function init3D(){
   scene=new THREE.Scene();scene.background=new THREE.Color(0x050708);scene.fog=new THREE.FogExp2(0x819094,.025);
   camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,.1,40);camera.position.set(0,.05,7.65);
   group=new THREE.Group();scene.add(group);
-  const hemi=new THREE.HemisphereLight(0xe8eef0,0x28323a,2.15);scene.add(hemi);
-  const key=new THREE.DirectionalLight(0xffedd2,1.05);key.position.set(-3,4,6);scene.add(key);
+  hemi=new THREE.HemisphereLight(0xe8eef0,0x28323a,2.15);scene.add(hemi);
+  key=new THREE.DirectionalLight(0xffedd2,1.05);key.position.set(-3,4,6);scene.add(key);
   const geo=new THREE.PlaneGeometry(16,9,160,90);
-  const makeMat=()=>new THREE.MeshStandardMaterial({transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:true,roughness:1,metalness:0,color:0xffffff});
-  meshA=new THREE.Mesh(geo,makeMat());meshB=new THREE.Mesh(geo.clone(),makeMat());group.add(meshA,meshB);front=meshA;back=meshB;
-  createWater();createMist();createRain();createPetals();createReeds();createWillow();resize();
+  meshA=new THREE.Mesh(geo,makeFilmMaterial());meshB=new THREE.Mesh(geo.clone(),makeFilmMaterial());group.add(meshA,meshB);front=meshA;back=meshB;
+  createWater();createMist();createRain();createPetals();createReeds();createWillow();createDirectorProps();resize();
  }catch(e){console.error(e);fallback.style.display='block';canvas.style.display='none'}
 }
 
@@ -145,18 +131,17 @@ function coverScale(){
 function resize(){if(!renderer||!camera)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);const s=coverScale();meshA.scale.setScalar(s);meshB.scale.setScalar(s)}
 addEventListener('resize',resize);
 
-function assign(mesh,i){
- const c=cues.find(x=>x.s===i);mesh.material.map=textures[i];mesh.material.displacementMap=depthTextures[i];
- mesh.material.displacementScale=c.depth;mesh.material.displacementBias=-c.depth*.36;mesh.material.needsUpdate=true;
+function assign(mesh,i,shot){
+ const m=mesh.material,d=[.06,.05,.045,.04,.04,.045,.04,.035,.04][i];m.uniforms.uMap.value=textures[i];m.uniforms.uDepth.value=depthTextures[i];
+ m.uniforms.uDepthScale.value=d;m.uniforms.uDepthBias.value=-d*.50;m.uniforms.uOpacity.value=0;m.needsUpdate=true;
 }
-function setScene(i,now){
- if(i===currentScene)return;const prev=front;back=(front===meshA?meshB:meshA);assign(back,i);back.material.opacity=0;back.visible=true;
- transition={from:prev,to:back,start:now,dur:1.65};front=back;currentScene=i;
- chapter.classList.remove('show');setTimeout(()=>{chapter.textContent=cues.find(x=>x.s===i).title;chapter.classList.add('show');setTimeout(()=>chapter.classList.remove('show'),1450)},120);
- updateFX(cues.find(x=>x.s===i).fx);
+function setScene(shot,now){
+ if(shot.scene===currentScene)return;
+ const prev=front;back=(front===meshA?meshB:meshA);assign(back,shot.scene,shot);back.visible=true;
+ if(shot.transition==='hard'){prev.visible=false;back.material.uniforms.uOpacity.value=1;front=back;currentScene=shot.scene;return}
+ transition={from:prev,to:back,start:now,dur:shot.transition==='fog'?1.15:shot.transition==='post'||shot.transition==='willow'?1.0:1.35};
+ front=back;currentScene=shot.scene;
 }
-function currentCue(t){let c=cues[0];for(const x of cues)if(t>=x.t)c=x;return c}
-function nextCueTime(s){const idx=cues.findIndex(x=>x.s===s);return idx>=0&&idx<cues.length-1?cues[idx+1].t:71.04}
 
 function makeRadialTexture(){
  const c=document.createElement('canvas');c.width=256;c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(128,64,4,128,64,118);
@@ -193,22 +178,58 @@ function createWillow(){
   const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(10)),m);l.userData.phase=Math.random()*6.28;willow.add(l)}
  willow.visible=false;scene.add(willow);
 }
+function createDirectorProps(){
+ occluder=new THREE.Mesh(new THREE.BoxGeometry(.72,12,.2),new THREE.MeshBasicMaterial({color:0x17100c,transparent:true,opacity:.95,depthTest:false}));
+ occluder.position.set(-12,0,6);occluder.visible=false;occluder.renderOrder=20;scene.add(occluder);
+ boat=new THREE.Group();const dark=new THREE.MeshBasicMaterial({color:0x171917,transparent:true,opacity:.78,depthTest:false});
+ const hull=new THREE.Mesh(new THREE.BoxGeometry(.65,.09,.16),dark);hull.rotation.z=-.035;boat.add(hull);
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(.30,.14,.13),dark);roof.position.set(.02,.13,0);boat.add(roof);
+ lantern=new THREE.Mesh(new THREE.SphereGeometry(.026,10,8),new THREE.MeshBasicMaterial({color:0xd7a057,transparent:true,opacity:.8,depthTest:false}));
+ lantern.position.set(.19,.12,.02);boat.add(lantern);boat.position.set(.05,-1.52,2.2);boat.scale.setScalar(.38);boat.visible=false;boat.renderOrder=12;scene.add(boat);
+}
 function updateFX(type){rain.visible=type==='rain';petals.visible=type==='petals';reeds.visible=type==='reeds';willow.visible=type==='willow';water.material.uniforms.uOpacity.value=type==='rain'?.12:.075;scene.fog.density=type==='mist'?.032:type==='rain'?.028:.021}
+function triggerOcclusion(type,now){
+ if(!type||type==='cut'||type==='hard')return;
+ occlusion={type,start:now,dur:type==='post'?1.05:type==='willow'?1.2:1.15};
+ if(type==='post'){occluder.visible=true;occluder.position.x=-8.5}
+ if(type==='fog')fogPulse=1;
+ if(type==='willow'){willow.visible=true;willow.position.x=-1.4}
+}
+function updateOcclusion(now){
+ if(!occlusion)return;const p=clamp((now-occlusion.start)/occlusion.dur);
+ if(occlusion.type==='post')occluder.position.x=-8.5+17*ease(p);
+ if(occlusion.type==='fog')fogPulse=Math.max(fogPulse,Math.sin(p*Math.PI));
+ if(occlusion.type==='willow')willow.position.x=-1.4+2.8*ease(p);
+ if(p>=1){if(occlusion.type==='post')occluder.visible=false;if(occlusion.type==='willow'&&director.current.fx!=='willow'){willow.visible=false;willow.position.x=0}occlusion=null}
+}
+function onShotChange(shot,prev){
+ const sceneChanged=!prev||prev.scene!==shot.scene;
+ if(sceneChanged){setScene(shot,clock.elapsedTime);chapter.classList.remove('show');setTimeout(()=>{chapter.textContent=shot.title;chapter.classList.add('show');setTimeout(()=>chapter.classList.remove('show'),1300)},120)}
+ updateFX(shot.fx);triggerOcclusion(shot.transition,clock.elapsedTime);
+}
+director=new Director(shots,{onShotChange});
 
 function animateFX(t,dt){
  water.material.uniforms.uTime.value=t;
- mists.forEach((m,i)=>{m.position.x+=dt*(.025+i*.003);if(m.position.x>6.5)m.position.x=-6.5;m.material.opacity=.055+.025*Math.sin(t*.15+i)});
- if(rain.visible){const a=rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i]-=dt*.75;a[i+1]-=dt*4.2;if(a[i+1]<-5){a[i+1]=5;a[i]=(Math.random()-.5)*16}}rain.geometry.attributes.position.needsUpdate=true}
- if(petals.visible){const a=petals.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i]+=dt*.18*(.7+(i%5)*.1);a[i+1]-=dt*.22;if(a[i+1]<-4){a[i+1]=4;a[i]=(Math.random()-.5)*14}}petals.geometry.attributes.position.needsUpdate=true}
- if(reeds.visible)reeds.children.forEach((r,i)=>r.rotation.z=Math.sin(t*.6+r.userData.phase)*.012*(1+i%3));
- if(willow.visible)willow.children.forEach((r,i)=>r.rotation.z=Math.sin(t*.42+r.userData.phase)*.009*(1+i%4));
+ mists.forEach((m,i)=>{m.position.x+=dt*(.025+i*.003);if(m.position.x>6.5)m.position.x=-6.5;m.material.opacity=.045+.022*Math.sin(t*.15+i)+fogPulse*.055});
+ fogPulse*=.94;
+ if(rain.visible){const a=rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i]-=dt*.8;a[i+1]-=dt*4.5;if(a[i+1]<-5){a[i+1]=5;a[i]=(Math.random()-.5)*16}}rain.geometry.attributes.position.needsUpdate=true}
+ if(petals.visible){const a=petals.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i]+=dt*.16*(.7+(i%5)*.1);a[i+1]-=dt*.20;if(a[i+1]<-4){a[i+1]=4;a[i]=(Math.random()-.5)*14}}petals.geometry.attributes.position.needsUpdate=true}
+ if(reeds.visible)reeds.children.forEach((r,i)=>r.rotation.z=Math.sin(t*.58+r.userData.phase)*.012*(1+i%3));
+ if(willow.visible)willow.children.forEach((r,i)=>r.rotation.z=Math.sin(t*.40+r.userData.phase)*.010*(1+i%4));
 }
-function updateCamera(t){
- const c=currentCue(t),end=nextCueTime(c.s),p=ease(clamp((t-c.t)/Math.max(2,end-c.t))),a=c.cam[0],b=c.cam[1];
- camera.position.set(lerp(a[0],b[0],p),lerp(a[1],b[1],p),lerp(a[2],b[2],p));
- camera.lookAt(lerp(-.08,.06,p),lerp(.02,-.03,p),0);
+function applyDirectorState(st,now){
+ const hold=st.shot.id.includes('hold')||st.shot.id==='not_same',drift=hold?0:.0035;
+ camera.position.set(st.camera[0]+Math.sin(now*.43)*drift,st.camera[1]+Math.sin(now*.31+1.2)*drift,st.camera[2]);
+ camera.lookAt(st.look[0],st.look[1],st.look[2]);
  const s=coverScale();meshA.scale.setScalar(s);meshB.scale.setScalar(s);
- group.rotation.y=lerp(-.012,.012,p);group.rotation.x=lerp(.005,-.005,p);
+ group.rotation.y=hold?0:Math.sin(now*.12)*.004;group.rotation.x=hold?0:Math.sin(now*.10+.8)*.0025;
+ for(const m of [meshA.material,meshB.material]){m.uniforms.uFocus.value=st.focus;m.uniforms.uWarmth.value=st.warmth;m.uniforms.uExposure.value=st.exposure}
+ const warm=Math.max(0,st.warmth);hemi.intensity=1.85+warm*.8;key.intensity=.82+warm*1.45;
+ key.color.setRGB(1,.89+warm*.08,.76+warm*.12);
+ score.volume=(muted||TEST_MUTE)?0:st.music;voice.volume=(muted||TEST_MUTE)?0:1;if(envGain)envGain.gain.setTargetAtTime(muted?0:.010,envCtx.currentTime,.15);
+ boat.visible=st.shot.id==='departure';
+ if(boat.visible){const p=st.boat;boat.position.set(.05+.28*p,-1.52+.16*p,2.2-1.55*p);const z=.38-.27*p;boat.scale.setScalar(z);lantern.material.opacity=.8*(1-p*.72)}
 }
 function setCaption(t){
  let idx=-1;for(let i=0;i<captions.length;i++)if(t>=captions[i].a&&t<captions[i].b)idx=i;
@@ -217,35 +238,38 @@ function setCaption(t){
  setTimeout(()=>{caption.innerHTML=captions[idx].text;caption.className=captions[idx].poem?'poem':'';requestAnimationFrame(()=>caption.classList.add('show'))},150);
 }
 function createEnv(){
- const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;envCtx=new AC();envGain=envCtx.createGain();envGain.gain.value=.011;envGain.connect(envCtx.destination);
+ if(TEST_MUTE)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;envCtx=new AC();envGain=envCtx.createGain();envGain.gain.value=.011;envGain.connect(envCtx.destination);
  const b=envCtx.createBuffer(1,envCtx.sampleRate*2,envCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(.5+.5*Math.sin(i*.00011));
  const s=envCtx.createBufferSource(),f=envCtx.createBiquadFilter();s.buffer=b;s.loop=true;f.type='lowpass';f.frequency.value=520;s.connect(f).connect(envGain);s.start();
 }
-function soundMix(t){score.volume=muted?0:(t<30?.19:t<47?.23:t<61?.14:.055);voice.volume=muted?0:1;if(envGain)envGain.gain.setTargetAtTime(muted?0:.011,envCtx.currentTime,.18)}
+function updateTransition(now){
+ if(!transition)return;const p=clamp((now-transition.start)/transition.dur),e=ease(p);
+ transition.to.material.uniforms.uOpacity.value=e;transition.from.material.uniforms.uOpacity.value=1-e;
+ if(p>=1){transition.from.visible=false;transition.to.material.uniforms.uOpacity.value=1;transition=null}
+}
 function render(){
  const dt=Math.min(clock.getDelta(),.05),now=clock.elapsedTime;
  if(renderer){
   if(started&&!ended){
-   const t=voice.currentTime,ci=currentCue(t);if(ci.s!==currentScene)setScene(ci.s,now);
-   if(transition){const p=clamp((now-transition.start)/transition.dur);transition.to.material.opacity=ease(p);transition.from.material.opacity=1-ease(p);if(p>=1){transition.from.visible=false;transition=null}}
-   updateCamera(t);setCaption(t);soundMix(t);progress.style.width=Math.min(100,t/71.04*100)+'%';if(t>=62.8)seal.style.opacity=1;
+   const t=voice.currentTime,st=director.update(t);applyDirectorState(st,now);setCaption(t);
+   progress.style.width=Math.min(100,t/FILM_DURATION*100)+'%';if(t>=63.0)seal.style.opacity=1;
   }
-  animateFX(now,dt);renderer.render(scene,camera);
+  updateTransition(now);updateOcclusion(now);animateFX(now,dt);renderer.render(scene,camera);
  }
  requestAnimationFrame(render)
 }
 
 async function startFilm(){
- if(started)return;started=true;ended=false;currentScene=-1;currentCaption=-1;seal.style.opacity=0;fade.style.opacity=0;replay.classList.remove('show');
- if(!renderer)init3D();createEnv();intro.style.opacity=0;setTimeout(()=>intro.style.display='none',1500);
- voice.currentTime=0;score.currentTime=0;score.play().catch(()=>{});voice.play().catch(()=>{});
+ if(started)return;started=true;ended=false;currentScene=0;currentCaption=-1;director.current=null;seal.style.opacity=0;fade.style.opacity=0;replay.classList.remove('show');
+ createEnv();intro.style.opacity=0;setTimeout(()=>intro.style.display='none',1500);
+ voice.currentTime=0;score.currentTime=0;voice.muted=muted||TEST_MUTE;score.muted=muted||TEST_MUTE;score.play().catch(()=>{});voice.play().catch(()=>{});
 }
 enter.onclick=startFilm;
-sound.onclick=()=>{muted=!muted;sound.textContent=muted?'声音关闭':'声音开启';voice.muted=muted;score.muted=muted;if(envGain)envGain.gain.setTargetAtTime(muted?0:.011,envCtx.currentTime,.18)};
-voice.onended=()=>{ended=true;caption.classList.remove('show');progress.style.width='100%';score.volume=.035;setTimeout(()=>{fade.style.opacity=.42;replay.classList.add('show')},2500)};
-replay.onclick=()=>{ended=false;started=true;currentScene=-1;currentCaption=-1;fade.style.opacity=0;seal.style.opacity=0;replay.classList.remove('show');meshA.visible=true;meshB.visible=true;voice.currentTime=0;score.currentTime=0;score.play().catch(()=>{});voice.play().catch(()=>{})};
+sound.onclick=()=>{muted=!muted;sound.textContent=muted?'声音关闭':'声音开启';voice.muted=muted||TEST_MUTE;score.muted=muted||TEST_MUTE;if(envGain)envGain.gain.setTargetAtTime(muted?0:.010,envCtx.currentTime,.18)};
+voice.onended=()=>{ended=true;caption.classList.remove('show');progress.style.width='100%';score.volume=muted?0:.018;setTimeout(()=>fade.style.opacity=.52,1100);setTimeout(()=>replay.classList.add('show'),3000)};
+replay.onclick=()=>{ended=false;started=true;director.current=null;currentScene=0;currentCaption=-1;transition=null;fade.style.opacity=0;seal.style.opacity=0;replay.classList.remove('show');meshA.visible=true;meshB.visible=false;front=meshA;back=meshB;voice.currentTime=0;score.currentTime=0;voice.muted=muted||TEST_MUTE;score.muted=muted||TEST_MUTE;score.play().catch(()=>{});voice.play().catch(()=>{})};
 
-await preload();init3D();assign(meshA,0);meshA.material.opacity=1;meshA.visible=true;meshB.visible=false;currentScene=0;updateFX('mist');render();
+await preload();init3D();assign(meshA,0,shots[0]);meshA.material.uniforms.uOpacity.value=1;meshA.visible=true;meshB.visible=false;currentScene=0;updateFX('mist');render();
 </script>
 </body>
 </html>

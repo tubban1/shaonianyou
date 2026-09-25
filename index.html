@@ -1,72 +1,141 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b0d"><title>少年游 · 唐多令</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090a">
+<title>少年游 · 唐多令</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070a0c;color:#eee;font-family:"Songti SC","STSong","Noto Serif SC",serif}body{touch-action:manipulation}
-canvas{position:fixed;inset:0;width:100%;height:100%}.veil{position:fixed;inset:0;background:radial-gradient(circle at 50% 42%,transparent 15%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.7) 120%);pointer-events:none}
-.grain{position:fixed;inset:0;opacity:.06;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E")}
-#intro{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#1d2425,#07090a 72%);z-index:8;transition:opacity 1.8s}
-.introbox{text-align:center;padding:28px}.seal{font-size:11px;letter-spacing:.42em;color:#a99779;margin-bottom:26px}.title{font-size:clamp(42px,8vw,88px);font-weight:400;letter-spacing:.18em;margin-right:-.18em}.author{margin-top:15px;color:#a9aaa5;letter-spacing:.45em;font-size:13px}.enter{margin-top:54px;border:1px solid rgba(220,210,185,.34);background:rgba(255,255,255,.025);color:#d7d0bf;border-radius:99px;padding:12px 27px;letter-spacing:.25em;cursor:pointer}.enter:hover{background:rgba(255,255,255,.07)}
-#words{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;padding:9vw;z-index:4}.card{text-align:center;max-width:920px;text-shadow:0 2px 18px #000;opacity:0;transform:translateY(12px);transition:opacity 1.8s,transform 1.8s}.card.show{opacity:1;transform:none}.poem{font-size:clamp(28px,5vw,58px);letter-spacing:.16em;line-height:1.8}.prose{font-size:clamp(18px,2.6vw,31px);letter-spacing:.12em;line-height:1.9;color:#d7d4ca}.small{display:block;margin-top:16px;font-size:12px;color:#9a978e;letter-spacing:.3em}
-#progress{position:fixed;left:0;bottom:0;height:1px;background:#c7b58c;width:0;z-index:6;opacity:.7}
-#sound{position:fixed;right:18px;top:18px;z-index:7;color:#aaa;font:12px sans-serif;letter-spacing:.1em;opacity:.6}
-@media(max-width:600px){.poem{font-size:clamp(27px,8vw,42px)}.prose{font-size:18px;line-height:2.05}.card{max-width:92vw}.title{font-size:54px}#sound{top:auto;bottom:18px;right:16px}} 
-</style></head>
-<body>
-<canvas id="c"></canvas><div class="veil"></div><div class="grain"></div>
-<div id="intro"><div class="introbox"><div class="seal">南宋 · 刘过</div><div class="title">少年游</div><div class="author">唐多令 · 芦叶满汀洲</div><button class="enter" id="enter">入 画</button></div></div>
-<div id="words"><div class="card" id="card"></div></div><div id="progress"></div><div id="sound">声场 · 江风 · 古琴 · 沧桑旁白</div>
-<script>
-const cv=document.querySelector('#c'),ctx=cv.getContext('2d'),card=document.querySelector('#card'),intro=document.querySelector('#intro'),progress=document.querySelector('#progress');
-let W,H,dpr,t0=0,started=false,wind=0;
-function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
-const reeds=Array.from({length:95},(_,i)=>({x:Math.random()*W,y:H*(.62+Math.random()*.32),h:45+Math.random()*150,a:.18+Math.random()*.42,s:Math.random()*6.28}));
-const stars=Array.from({length:45},()=>({x:Math.random(),y:Math.random()*.46,a:Math.random()*.5}));
-function scene(ms){let t=ms*.001;ctx.clearRect(0,0,W,H);
-let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#10191c');g.addColorStop(.52,'#263033');g.addColorStop(.53,'#171d1e');g.addColorStop(1,'#080c0d');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-stars.forEach(s=>{ctx.fillStyle='rgba(225,222,205,'+(s.a*.25)+')';ctx.fillRect(s.x*W,s.y*H,1,1)});
-let moonX=W*.72,moonY=H*.22,r=Math.min(W,H)*.07;let mg=ctx.createRadialGradient(moonX,moonY,0,moonX,moonY,r*2.4);mg.addColorStop(0,'rgba(236,229,199,.82)');mg.addColorStop(.34,'rgba(218,213,190,.3)');mg.addColorStop(1,'rgba(218,213,190,0)');ctx.fillStyle=mg;ctx.beginPath();ctx.arc(moonX,moonY,r*2.4,0,7);ctx.fill();ctx.fillStyle='rgba(229,223,198,.72)';ctx.beginPath();ctx.arc(moonX,moonY,r,0,7);ctx.fill();
-ctx.fillStyle='#111719';ctx.beginPath();ctx.moveTo(0,H*.53);for(let x=0;x<=W;x+=W/8)ctx.lineTo(x,H*(.43+Math.sin(x*.009)*.035+Math.random()*.01));ctx.lineTo(W,H*.62);ctx.lineTo(0,H*.62);ctx.fill();
-for(let y=H*.55;y<H;y+=8){ctx.strokeStyle='rgba(165,177,170,'+(0.025+(y/H)*.035)+')';ctx.beginPath();for(let x=0;x<W;x+=22){let yy=y+Math.sin(x*.025+t*.65+y)*2;ctx.lineTo(x,yy)}ctx.stroke()}
-wind=Math.sin(t*.42)*.05;reeds.forEach(q=>{let x=q.x,y=q.y;ctx.strokeStyle='rgba(160,151,119,'+q.a+')';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.sin(t+q.s)*5,y-q.h*.5,x+Math.sin(t*.8+q.s)*11,y-q.h);ctx.stroke();ctx.fillStyle='rgba(171,159,122,'+(q.a*.8)+')';ctx.beginPath();ctx.ellipse(x+Math.sin(t*.8+q.s)*11,y-q.h,10,2.2,-.25+wind,0,7);ctx.fill()});
-let bx=W*(.32+Math.sin(t*.08)*.012),by=H*.69;ctx.fillStyle='rgba(3,5,5,.92)';ctx.beginPath();ctx.moveTo(bx-62,by);ctx.quadraticCurveTo(bx,by+19,bx+72,by);ctx.lineTo(bx+48,by+12);ctx.lineTo(bx-43,by+12);ctx.fill();ctx.strokeStyle='rgba(194,177,132,.25)';ctx.beginPath();ctx.moveTo(bx+7,by);ctx.lineTo(bx+7,by-63);ctx.stroke();
-requestAnimationFrame(scene)}requestAnimationFrame(scene);
-const cues=[
-[0,'prose','二十年，可以改变多少事？<br>一个人从少年走到暮色，<br>一座城换了人间。<br><span class="small">可江水，仍旧这样流。</span>'],
-[10,'poem','芦叶满汀洲，<br>寒沙带浅流。'],
-[18,'poem','二十年重过南楼。'],
-[25,'poem','柳下系船犹未稳，<br>能几日，又中秋。'],
-[35,'prose','我们以为重回故地，<br>便能遇见从前。<br><span class="small">后来才明白，故地可以重游，故人未必还在。</span>'],
-[46,'poem','黄鹤断矶头，<br>故人今在否？'],
-[55,'poem','旧江山浑是新愁。'],
-[63,'prose','酒还是可以买的。<br>桂花也依旧会开。<br><span class="small">可有些东西，一旦走过，便再也回不来了。</span>'],
-[74,'poem','欲买桂花同载酒，'],
-[81,'poem','终不似，'],
-[86,'poem','少年游。'],
-[94,'prose','场景可以复原，<br>人生不能复原。<span class="small">刘过 · 唐多令</span>']
-],duration=102;let cue=-1;
-const narration=[
-[0,'二十年，可以改变多少事？一个人从少年走到暮色，一座城换了人间。可江水，仍旧这样流。'],
-[10,'芦叶满汀洲，寒沙带浅流。'],
-[18,'二十年重过南楼。'],
-[25,'柳下系船犹未稳，能几日，又中秋。'],
-[35,'我们以为重回故地，便能遇见从前。后来才明白，故地可以重游，故人未必还在。'],
-[46,'黄鹤断矶头，故人今在否？'],
-[55,'旧江山，浑是新愁。'],
-[63,'酒还是可以买的。桂花也依旧会开。可有些东西，一旦走过，便再也回不来了。'],
-[74,'欲买桂花同载酒。'],
-[81,'终不似……'],
-[86,'少年游。']
-];let spoken=-1;
-function tick(ts){if(!started)return;let s=(ts-t0)/1000;progress.style.width=Math.min(100,s/duration*100)+'%';let n=-1;for(let i=0;i<cues.length;i++)if(s>=cues[i][0])n=i;if(n!==cue){cue=n;card.classList.remove('show');setTimeout(()=>{if(cue>=0){card.className='card '+cues[cue][1];card.innerHTML=cues[cue][2];requestAnimationFrame(()=>card.classList.add('show'))}},650)}let sn=-1;for(let i=0;i<narration.length;i++)if(s>=narration[i][0])sn=i;if(sn!==spoken){spoken=sn;if(sn>=0)speak(narration[sn][1],sn)}if(s<duration)requestAnimationFrame(tick)}
-function speak(text,i){if(!('speechSynthesis' in window))return; speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=i===10?0.62:0.72;u.pitch=.68;u.volume=.9;let vs=speechSynthesis.getVoices(),v=vs.find(x=>/zh|Chinese|Ting|Yun|Liang/i.test(x.lang+' '+x.name));if(v)u.voice=v;speechSynthesis.speak(u)}
-function audio(){
-let A=new (window.AudioContext||window.webkitAudioContext)(),master=A.createGain(),comp=A.createDynamicsCompressor();master.gain.value=.17;master.connect(comp).connect(A.destination);
-let river=A.createOscillator(),rg=A.createGain();river.type='sine';river.frequency.value=48;rg.gain.value=.018;river.connect(rg).connect(master);river.start();
-let noise=A.createBuffer(1,A.sampleRate*2,A.sampleRate),d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);let src=A.createBufferSource();src.buffer=noise;src.loop=true;let f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=480;let ng=A.createGain();ng.gain.value=.055;src.connect(f).connect(ng).connect(master);src.start();
-[146.83,220,293.66].forEach((hz,j)=>{let o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=hz;g.gain.value=.012/(j+1);o.connect(g).connect(master);o.start();setInterval(()=>{let now=A.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(.003,now);g.gain.linearRampToValueAtTime(.018/(j+1),now+2);g.gain.exponentialRampToValueAtTime(.002,now+8)},12000+j*3900)});
+:root{--ink:#080b0c;--paper:#d9d2bf;--gold:#b8a27a;--mist:rgba(220,225,216,.11)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06090a;color:#eee;font-family:"Songti SC","STSong","Noto Serif SC",serif}
+body{touch-action:manipulation}button{font:inherit}
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block}
+#film,#vignette,#flash{position:fixed;inset:0;pointer-events:none}
+#film{opacity:.07;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E")}
+#vignette{background:radial-gradient(circle at 50% 43%,transparent 22%,rgba(0,0,0,.24) 62%,rgba(0,0,0,.82) 120%)}
+#flash{opacity:0;background:radial-gradient(circle at 50% 42%,rgba(230,187,125,.28),rgba(116,68,42,.08) 45%,transparent 75%);transition:opacity 1.8s}
+#intro{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:
+radial-gradient(circle at 50% 32%,rgba(49,60,59,.88),rgba(8,11,12,.98) 68%);transition:opacity 1.6s}
+.introbox{text-align:center;padding:32px}.eyebrow{font-size:11px;letter-spacing:.5em;color:#a99878;margin-bottom:22px}
+h1{font-weight:400;font-size:clamp(48px,9vw,96px);letter-spacing:.22em;margin:0 -0.22em 0 0}
+.subtitle{margin-top:18px;font-size:13px;letter-spacing:.45em;color:#aeb0aa}
+.enter{margin-top:54px;border:1px solid rgba(226,216,192,.34);background:rgba(255,255,255,.025);color:#ddd3bd;border-radius:999px;padding:13px 29px;letter-spacing:.28em;cursor:pointer;backdrop-filter:blur(8px)}
+.enter:active{transform:scale(.98)}
+#copy{position:fixed;inset:0;z-index:8;display:grid;place-items:center;padding:8vw;pointer-events:none}
+.card{opacity:0;transform:translateY(14px) scale(.995);transition:opacity 1.55s ease,transform 1.55s ease;text-align:center;max-width:980px;text-shadow:0 3px 22px #000}
+.card.show{opacity:1;transform:none}.poem{font-size:clamp(30px,5.1vw,62px);line-height:1.75;letter-spacing:.18em}.prose{font-size:clamp(18px,2.6vw,31px);line-height:1.95;letter-spacing:.11em;color:#d7d3c7}
+.note{display:block;margin-top:18px;font-size:12px;letter-spacing:.3em;color:#9d998f}
+.vertical{writing-mode:vertical-rl;text-orientation:mixed;line-height:1.95;letter-spacing:.22em}
+#hud{position:fixed;z-index:12;left:18px;right:18px;top:16px;display:flex;justify-content:space-between;align-items:center;font:11px/1.2 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.12em;color:rgba(230,230,220,.58)}
+#progress{position:fixed;left:0;bottom:0;height:1px;width:0;background:linear-gradient(90deg,#786849,#d1bd8f);z-index:12;box-shadow:0 0 14px rgba(205,184,136,.4)}
+#sceneLabel{opacity:.7}#audioState{cursor:pointer;pointer-events:auto}
+#endmark{position:fixed;right:6vw;bottom:6vw;z-index:9;opacity:0;transition:opacity 2s;color:#b64235;border:1px solid rgba(182,66,53,.7);padding:7px 5px 5px;font-size:12px;line-height:1;letter-spacing:.15em;writing-mode:vertical-rl}
+@media(max-width:640px){
+#copy{padding:12vw 7vw}.poem{font-size:clamp(28px,8.2vw,44px);line-height:1.9}.prose{font-size:18px;line-height:2.05}.note{font-size:10px}.subtitle{font-size:11px}.hud{font-size:10px}
 }
-document.querySelector('#enter').onclick=()=>{started=true;intro.style.opacity=0;setTimeout(()=>intro.remove(),1900);try{audio()}catch(e){}t0=performance.now();requestAnimationFrame(tick)};
-</script></body></html>
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas><div id="film"></div><div id="vignette"></div><div id="flash"></div>
+<div id="intro"><div class="introbox"><div class="eyebrow">南宋 · 刘过</div><h1>少年游</h1><div class="subtitle">唐多令 · 芦叶满汀洲</div><button id="enter" class="enter">入 画</button></div></div>
+<div id="copy"><div id="card" class="card"></div></div>
+<div id="hud"><span id="sceneLabel">二十年 · 重过南楼</span><span id="audioState">声音开启</span></div>
+<div id="progress"></div><div id="endmark">少年游</div>
+<script>
+const cv=document.querySelector('#stage'),ctx=cv.getContext('2d');
+const card=document.querySelector('#card'),intro=document.querySelector('#intro'),progress=document.querySelector('#progress'),flash=document.querySelector('#flash'),endmark=document.querySelector('#endmark'),audioState=document.querySelector('#audioState');
+let W=0,H=0,dpr=1,start=0,running=false,lastCue=-1,lastVoice=-1,muted=false,bgm=null;
+const voiceUrls=[
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=6de40045-212a-49b7-a098-f349330a7599.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=5012887e-6353-4129-a3e9-17afebc28113.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=51fb414a-a2cf-4b15-9f75-a6efd45a588e.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=94669680-61c9-4f3b-9d9c-46073b5f1a2a.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=e7a9dbe3-6f96-458d-b143-118c883af1c4.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=63c0f50d-3415-4245-a85e-c7d69c8eebe4.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=c63f7001-1bf7-4f75-a923-6d57d6091aae.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=68f0d2d0-6d11-4462-875a-0d34fe1b0740.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=f285cf70-acc3-41d0-b3d9-74ff963a6707.wav',
+'https://resource2.heygen.ai/text_to_speech/735f53ebaa38421cbf63c761f76fe20c/5700258d53664cecb4b21a8154856355/id=696c2f2e-86dd-4647-9931-fc463fd31e6f.wav'];
+const bgmUrl='https://heygen-product.s3-accelerate.amazonaws.com/astral_generated_music/d6a9574c2a344aa9aa69d3d26b6c6f74.wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA3FLD4S3AS7WYJKBK%2F20260925%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20260925T073702Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=08dcf8bf6814acfcb6d451d6c621ff78ee989bf91748a41a155534245d07984d';
+const tracks=voiceUrls.map(u=>{const a=new Audio(u);a.preload='auto';a.volume=.92;return a});
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+const rand=(a,b)=>a+Math.random()*(b-a);
+let reeds=Array.from({length:120},()=>({x:Math.random(),h:rand(.08,.24),a:rand(.1,.48),p:rand(0,7),d:rand(.5,1.3)}));
+let motes=Array.from({length:70},()=>({x:Math.random(),y:Math.random(),r:rand(.4,1.8),p:rand(0,9)}));
+let petals=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),s:rand(.5,1.3),p:rand(0,9)}));
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function ease(a,b,t){t=clamp((t-a)/(b-a),0,1);return t*t*(3-2*t)}
+function line(points,fill,alpha=1){ctx.globalAlpha=alpha;ctx.fillStyle=fill;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();ctx.fill();ctx.globalAlpha=1}
+function sky(t){
+let night=clamp(t/102,0,1);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,night<.63?'#182326':'#0d1418');g.addColorStop(.48,night<.63?'#3b4140':'#1a2022');g.addColorStop(1,'#0a0e0f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+let mx=W*(.74-.04*ease(35,80,t)),my=H*(.18+.035*Math.sin(t*.025)),r=Math.min(W,H)*.064;
+let glow=ctx.createRadialGradient(mx,my,0,mx,my,r*3);glow.addColorStop(0,'rgba(239,229,196,.78)');glow.addColorStop(.25,'rgba(220,211,183,.26)');glow.addColorStop(1,'rgba(220,211,183,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(mx,my,r*3,0,7);ctx.fill();ctx.fillStyle='rgba(229,220,190,.67)';ctx.beginPath();ctx.arc(mx,my,r,0,7);ctx.fill();
+}
+function mountains(t){
+const drift=Math.sin(t*.03)*8;
+line([[0,H*.50],[W*.1,H*.43],[W*.22,H*.47],[W*.34,H*.39],[W*.47,H*.45],[W*.62,H*.36],[W*.77,H*.44],[W*.9,H*.38],[W,H*.43],[W,H*.58],[0,H*.58]],'#11191b',.88);
+line([[0,H*.54],[W*.15+drift,H*.49],[W*.29,H*.52],[W*.45,H*.46],[W*.63,H*.51],[W*.82,H*.47],[W,H*.50],[W,H*.62],[0,H*.62]],'#182021',.7);
+}
+function river(t){
+let g=ctx.createLinearGradient(0,H*.5,0,H);g.addColorStop(0,'#202a2b');g.addColorStop(1,'#070b0c');ctx.fillStyle=g;ctx.fillRect(0,H*.5,W,H*.5);
+for(let y=H*.56;y<H;y+=7){ctx.strokeStyle='rgba(197,203,192,'+(0.018+(y/H)*.04)+')';ctx.lineWidth=.7;ctx.beginPath();for(let x=-20;x<W+20;x+=18){ctx.lineTo(x,y+Math.sin(x*.021+t*.65+y*.02)*1.9)}ctx.stroke()}
+for(let i=0;i<5;i++){let yy=H*(.65+i*.055);let rg=ctx.createLinearGradient(W*.55,0,W*.9,0);rg.addColorStop(0,'rgba(220,206,166,0)');rg.addColorStop(.5,'rgba(220,206,166,.04)');rg.addColorStop(1,'rgba(220,206,166,0)');ctx.fillStyle=rg;ctx.fillRect(W*.55,yy,W*.3,1)}
+}
+function fog(t){
+for(let i=0;i<5;i++){let y=H*(.44+i*.08),x=((t*(5+i*1.2))*((i%2)?1:-1))%(W*1.3);ctx.fillStyle='rgba(215,220,214,'+(0.025+i*.007)+')';ctx.beginPath();ctx.ellipse(W*.5+x*.08,y,W*(.38+i*.05),H*.035,0,0,7);ctx.fill()}
+}
+function drawReeds(t){
+reeds.forEach(q=>{let x=q.x*W,y=H*(.7+q.d*.18),h=q.h*H,sw=Math.sin(t*.65+q.p)*8*q.d;ctx.strokeStyle='rgba(151,141,108,'+q.a+')';ctx.lineWidth=.6+q.d*.35;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+sw*.35,y-h*.55,x+sw,y-h);ctx.stroke();ctx.fillStyle='rgba(167,151,111,'+(q.a*.72)+')';ctx.beginPath();ctx.ellipse(x+sw,y-h,10*q.d,2*q.d,-.25,0,7);ctx.fill()})
+}
+function boat(t){
+let p=ease(8,86,t),x=W*(.13+.39*p)+Math.sin(t*.15)*5,y=H*(.72+Math.sin(t*.21)*.006);
+ctx.save();ctx.translate(x,y);ctx.fillStyle='rgba(4,6,6,.95)';ctx.beginPath();ctx.moveTo(-66,0);ctx.quadraticCurveTo(0,18,76,0);ctx.lineTo(48,12);ctx.lineTo(-43,12);ctx.fill();ctx.strokeStyle='rgba(188,168,126,.32)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(9,-72);ctx.stroke();ctx.fillStyle='rgba(14,16,15,.78)';ctx.fillRect(-14,-26,42,22);ctx.restore();
+}
+function tower(t){
+let a=ease(14,24,t)*(1-ease(44,52,t));if(a<=0)return;ctx.save();ctx.globalAlpha=.7*a;let x=W*.18,y=H*.48;ctx.fillStyle='#101515';ctx.fillRect(x-15,y-70,30,70);for(let k=0;k<3;k++){let yy=y-70+k*25;ctx.beginPath();ctx.moveTo(x-44,yy);ctx.lineTo(x+44,yy);ctx.lineTo(x+27,yy+10);ctx.lineTo(x-27,yy+10);ctx.fill()}ctx.restore()
+}
+function willow(t){
+let a=ease(20,27,t)*(1-ease(37,45,t));if(a<=0)return;ctx.save();ctx.globalAlpha=.65*a;let x=W*.78,y=H*.54;ctx.strokeStyle='#141917';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x-20,y-90,x+12,y-170);ctx.stroke();ctx.lineWidth=1.2;for(let i=0;i<20;i++){let ox=(i-10)*7;ctx.beginPath();ctx.moveTo(x+ox*.25,y-145+Math.abs(i-10)*2);ctx.quadraticCurveTo(x+ox,y-70,x+ox+Math.sin(t+i)*7,y-18);ctx.stroke()}ctx.restore()
+}
+function brokenRock(t){
+let a=ease(42,49,t);if(a<=0)return;ctx.save();ctx.globalAlpha=.8*a;let x=W*.17,y=H*.61;line([[x-45,y],[x-32,y-46],[x-12,y-55],[x+4,y-32],[x+21,y-70],[x+39,y-18],[x+56,y],[x-45,y]],'#0a0f10',.95);ctx.strokeStyle='rgba(190,184,165,.13)';ctx.beginPath();ctx.moveTo(x+16,y-68);ctx.lineTo(x+8,y-35);ctx.lineTo(x+25,y-16);ctx.stroke();ctx.restore()
+}
+function memory(t){
+let a=ease(31,37,t)*(1-ease(42,49,t));flash.style.opacity=(a*.68).toFixed(2);if(a<=0)return;ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.12*a;ctx.fillStyle='#c58f5b';ctx.fillRect(0,0,W,H);ctx.globalAlpha=.18*a;for(let i=0;i<7;i++){let x=W*(.25+i*.08),y=H*(.53+Math.sin(i)*.02);ctx.beginPath();ctx.arc(x,y-18,4,0,7);ctx.fill();ctx.fillRect(x-1,y-14,2,21)}ctx.restore()
+}
+function osmanthus(t){
+let a=ease(63,72,t);if(a<=0)return;petals.forEach((p,i)=>{let y=((p.y+t*.012*p.s)%1)*H,x=p.x*W+Math.sin(t*.8+p.p)*18;ctx.save();ctx.translate(x,y);ctx.rotate(t*.25+p.p);ctx.fillStyle='rgba(214,179,108,'+(.08+.2*a)+')';ctx.beginPath();ctx.ellipse(0,0,2.5*p.s,1.3*p.s,0,0,7);ctx.fill();ctx.restore()})
+}
+function motesDraw(t){motes.forEach(m=>{let x=(m.x*W+Math.sin(t*.15+m.p)*18),y=(m.y*H+t*1.7)%(H*.78);ctx.fillStyle='rgba(220,214,192,'+(m.r*.035)+')';ctx.beginPath();ctx.arc(x,y,m.r,0,7);ctx.fill()})}
+function render(ms){
+let t=running?(ms-start)/1000:0;sky(t);mountains(t);river(t);fog(t);tower(t);willow(t);brokenRock(t);memory(t);drawReeds(t);boat(t);osmanthus(t);motesDraw(t);
+requestAnimationFrame(render)}requestAnimationFrame(render);
+const cues=[
+[0,'prose','二十年，可以改变多少事？<br>一个人从少年走到暮色，<br>一座城换了人间。<span class="note">可江水，仍旧这样流。</span>'],
+[12,'poem','芦叶满汀洲，<br>寒沙带浅流。'],
+[19,'poem vertical','二十年重过南楼。'],
+[27,'poem','柳下系船犹未稳，<br>能几日，又中秋。'],
+[36,'prose','我们以为重回故地，<br>便能遇见从前。<span class="note">后来才明白：故地可以重游，故人未必还在。</span>'],
+[48,'poem','黄鹤断矶头，<br>故人今在否？'],
+[57,'poem vertical','旧江山浑是新愁。'],
+[66,'prose','酒还是可以买的。<br>桂花也依旧会开。<span class="note">可有些东西，一旦走过，便再也回不来了。</span>'],
+[78,'poem','欲买桂花同载酒，'],
+[86,'poem','终不似，'],
+[92,'poem','少年游。'],
+[99,'prose','场景可以复原，<br>人生不能复原。<span class="note">—— 刘过《唐多令》</span>']
+];
+const voiceTimes=[[0,0],[12,1],[27,2],[36,3],[48,4],[57,5],[66,6],[78,7],[86,8],[92,9]],duration=108;
+function showCue(i){card.classList.remove('show');setTimeout(()=>{card.className='card '+cues[i][1];card.innerHTML=cues[i][2];requestAnimationFrame(()=>card.classList.add('show'))},360)}
+function playVoice(i){if(muted||i<0)return;tracks.forEach((a,j)=>{if(j!==i){a.pause();a.currentTime=0}});let a=tracks[i];a.currentTime=0;a.play().catch(()=>{})}
+function tick(ms){if(!running)return;let t=(ms-start)/1000;progress.style.width=Math.min(100,t/duration*100)+'%';
+let c=0;for(let i=0;i<cues.length;i++)if(t>=cues[i][0])c=i;if(c!==lastCue){lastCue=c;showCue(c)}
+let v=-1;for(let i=0;i<voiceTimes.length;i++)if(t>=voiceTimes[i][0])v=i;if(v!==lastVoice){lastVoice=v;playVoice(voiceTimes[v][1])}
+if(t>92)endmark.style.opacity=Math.min(1,(t-92)/5);
+if(t<duration)requestAnimationFrame(tick)}
+function startMusic(){
+bgm=new Audio(bgmUrl);bgm.loop=true;bgm.volume=.2;bgm.playbackRate=.96;bgm.play().catch(()=>{});
+}
+document.querySelector('#enter').onclick=()=>{running=true;start=performance.now();intro.style.opacity=0;setTimeout(()=>intro.remove(),1700);startMusic();requestAnimationFrame(tick)};
+audioState.onclick=()=>{muted=!muted;audioState.textContent=muted?'声音关闭':'声音开启';tracks.forEach(a=>a.muted=muted);if(bgm)bgm.muted=muted};
+</script>
+</body></html>

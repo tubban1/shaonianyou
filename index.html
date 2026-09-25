@@ -16,9 +16,10 @@ body{touch-action:manipulation}
 #webgl{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fallback{position:absolute;inset:0;background:url("assets/v4/scenes/scene01.webp") center/cover;filter:brightness(.72) saturate(.8);display:none}
 .fx{position:absolute;inset:0;pointer-events:none}
-#grade{z-index:7;background:linear-gradient(180deg,rgba(4,16,22,.10),rgba(4,8,10,.015) 42%,rgba(0,0,0,.17));mix-blend-mode:color}
-#grain{z-index:8;opacity:.055;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='4' seed='23' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
-#vignette{z-index:9;background:radial-gradient(ellipse at 50% 47%,transparent 28%,rgba(0,0,0,.13) 62%,rgba(0,0,0,.72) 120%)}
+#grade{z-index:7;background:linear-gradient(180deg,rgba(4,16,22,.025),rgba(4,8,10,0) 42%,rgba(0,0,0,.035));mix-blend-mode:color}
+#focusLight{z-index:7;background:radial-gradient(circle at var(--fx,50%) var(--fy,50%),rgba(255,239,205,var(--fa,.11)) 0,rgba(255,239,205,.035) 18%,rgba(0,0,0,0) 42%);mix-blend-mode:screen;transition:background .35s linear}
+#grain{z-index:8;opacity:.032;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='4' seed='23' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
+#vignette{z-index:9;background:radial-gradient(ellipse at 50% 47%,transparent 42%,rgba(0,0,0,.055) 72%,rgba(0,0,0,.30) 125%)}
 #letterbox{z-index:10;background:linear-gradient(#000 0 4.8vh,transparent 4.8vh calc(100% - 4.8vh),#000 calc(100% - 4.8vh))}
 #fade{z-index:11;background:#030405;opacity:0;transition:opacity 2.5s ease}
 
@@ -54,7 +55,7 @@ h1{font-size:clamp(56px,9vw,110px);font-weight:400;letter-spacing:.21em;text-ind
 <body>
 <div id="stage">
   <canvas id="webgl"></canvas><div id="fallback"></div>
-  <div id="grade" class="fx"></div><div id="grain" class="fx"></div><div id="vignette" class="fx"></div><div id="letterbox" class="fx"></div><div id="fade" class="fx"></div>
+  <div id="grade" class="fx"></div><div id="focusLight" class="fx"></div><div id="grain" class="fx"></div><div id="vignette" class="fx"></div><div id="letterbox" class="fx"></div><div id="fade" class="fx"></div>
 </div>
 <div id="intro"><div class="introbox"><div class="era">南宋 · 刘过</div><h1>少年游</h1><div class="subhead">唐多令 · 芦叶满汀洲</div><button id="enter" disabled>入 江</button><div id="loadState">3D 场景载入中</div></div></div>
 <div id="chapter"></div>
@@ -75,7 +76,7 @@ const canvas=document.querySelector('#webgl'),fallback=document.querySelector('#
 enter=document.querySelector('#enter'),loadState=document.querySelector('#loadState'),voice=document.querySelector('#voice'),
 score=document.querySelector('#score'),caption=document.querySelector('#caption'),chapter=document.querySelector('#chapter'),
 sound=document.querySelector('#sound'),progress=document.querySelector('#progress'),seal=document.querySelector('#seal'),
-fade=document.querySelector('#fade'),replay=document.querySelector('#replay');
+fade=document.querySelector('#fade'),replay=document.querySelector('#replay'),focusLight=document.querySelector('#focusLight');
 const TEST_MUTE=new URLSearchParams(location.search).get('mute')==='1';
 
 const images=Array.from({length:9},(_,i)=>'assets/v4/scenes/scene'+String(i+1).padStart(2,'0')+'.webp');
@@ -87,6 +88,14 @@ let textures=[],depthTextures=[],water,rain,petals,reeds,willow,mists=[],clock=n
 let director,hemi,key,occluder,boat,lantern,occlusion=null,fogPulse=0;
 const texLoader=new THREE.TextureLoader();
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),ease=t=>t*t*(3-2*t);
+const FOCUS={
+ river_hold:[42,55,.13],river_truck:[43,54,.13],river_release:[68,46,.12],reeds_rack:[58,55,.12],
+ tower_reveal:[61,47,.15],rope_low:[54,67,.16],autumn_tilt:[52,42,.12],
+ memory_enter:[48,49,.16],memory_orbit:[53,49,.17],memory_drain:[58,50,.13],empty_seat:[62,50,.11],
+ ruin_impact:[55,52,.13],oldfriend_hold:[69,45,.14],oldcity_reveal:[55,48,.12],
+ wine_flower:[42,64,.17],wine_pot:[52,58,.18],wine_hand:[61,56,.19],
+ not_same:[61,56,.12],silence_hold:[61,56,.10],youth_release:[50,48,.10],withdraw:[50,48,.08],departure:[58,45,.08]
+};
 
 function loadTex(url,color=false){return new Promise((res,rej)=>texLoader.load(url,t=>{if(color)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;res(t)},undefined,rej))}
 async function preload(){
@@ -100,9 +109,8 @@ async function preload(){
 
 function makeFilmMaterial(){
  const vs='uniform sampler2D uDepth;uniform float uDepthScale;uniform float uDepthBias;varying vec2 vUv;void main(){vUv=uv;float d=texture2D(uDepth,uv).r;vec3 p=position;p.z+=(d*uDepthScale)+uDepthBias;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}';
- const fs='uniform sampler2D uMap;uniform sampler2D uDepth;uniform float uOpacity;uniform float uFocus;uniform float uWarmth;uniform float uExposure;uniform vec2 uTexel;varying vec2 vUv;'+
- 'vec3 sf(vec2 uv,float r){vec3 c=texture2D(uMap,uv).rgb*.28;c+=texture2D(uMap,uv+uTexel*vec2(r,0.)).rgb*.12;c+=texture2D(uMap,uv-uTexel*vec2(r,0.)).rgb*.12;c+=texture2D(uMap,uv+uTexel*vec2(0.,r)).rgb*.12;c+=texture2D(uMap,uv-uTexel*vec2(0.,r)).rgb*.12;c+=texture2D(uMap,uv+uTexel*vec2(r,r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(-r,r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(r,-r)).rgb*.06;c+=texture2D(uMap,uv+uTexel*vec2(-r,-r)).rgb*.06;return c;}'+
- 'void main(){float d=texture2D(uDepth,vUv).r;float coc=smoothstep(.055,.34,abs(d-uFocus));vec3 c=sf(vUv,1.0+coc*5.5);float y=dot(c,vec3(.299,.587,.114));c=mix(vec3(y),c,.93);c.r+=uWarmth*.115;c.g+=uWarmth*.028;c.b-=uWarmth*.105;c*=uExposure;gl_FragColor=vec4(c,uOpacity);}';
+ const fs='uniform sampler2D uMap;uniform float uOpacity;uniform float uWarmth;uniform float uExposure;varying vec2 vUv;'+
+ 'void main(){vec3 c=texture2D(uMap,vUv).rgb;float y=dot(c,vec3(.299,.587,.114));c=mix(vec3(y),c,1.03);c=(c-.5)*1.06+.5;c.r+=uWarmth*.09;c.g+=uWarmth*.024;c.b-=uWarmth*.075;c*=uExposure;gl_FragColor=vec4(c,uOpacity);}';
  return new THREE.ShaderMaterial({transparent:true,depthWrite:false,depthTest:false,side:THREE.DoubleSide,
   uniforms:{uMap:{value:null},uDepth:{value:null},uDepthScale:{value:.7},uDepthBias:{value:-.25},uOpacity:{value:0},uFocus:{value:.55},uWarmth:{value:0},uExposure:{value:1},uTexel:{value:new THREE.Vector2(1/1600,1/900)}},
   vertexShader:vs,fragmentShader:fs});
@@ -112,7 +120,7 @@ function init3D(){
  try{
   renderer=new THREE.WebGLRenderer({canvas,antialias:innerWidth>700,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<700?1.35:1.7));renderer.setSize(innerWidth,innerHeight,false);
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.97;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
   scene=new THREE.Scene();scene.background=new THREE.Color(0x050708);scene.fog=new THREE.FogExp2(0x819094,.025);
   camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,.1,40);camera.position.set(0,.05,7.65);
   group=new THREE.Group();scene.add(group);
@@ -224,7 +232,8 @@ function applyDirectorState(st,now){
  camera.lookAt(st.look[0],st.look[1],st.look[2]);
  const s=coverScale();meshA.scale.setScalar(s);meshB.scale.setScalar(s);
  group.rotation.y=hold?0:Math.sin(now*.12)*.004;group.rotation.x=hold?0:Math.sin(now*.10+.8)*.0025;
- for(const m of [meshA.material,meshB.material]){m.uniforms.uFocus.value=st.focus;m.uniforms.uWarmth.value=st.warmth;m.uniforms.uExposure.value=st.exposure}
+ for(const m of [meshA.material,meshB.material]){m.uniforms.uWarmth.value=st.warmth;m.uniforms.uExposure.value=clamp(st.exposure*1.18,1.02,1.28)}
+ const fp=FOCUS[st.shot.id]||[50,50,.10];focusLight.style.setProperty('--fx',fp[0]+'%');focusLight.style.setProperty('--fy',fp[1]+'%');focusLight.style.setProperty('--fa',fp[2]);
  const warm=Math.max(0,st.warmth);hemi.intensity=1.85+warm*.8;key.intensity=.82+warm*1.45;
  key.color.setRGB(1,.89+warm*.08,.76+warm*.12);
  score.volume=(muted||TEST_MUTE)?0:st.music;voice.volume=(muted||TEST_MUTE)?0:1;if(envGain)envGain.gain.setTargetAtTime(muted?0:.010,envCtx.currentTime,.15);

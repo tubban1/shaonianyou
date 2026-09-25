@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17262e">
+<title>少年游 · Pure Three.js</title>
+<style>
+:root{--ivory:#eee6d6}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17262e;color:var(--ivory);font-family:"Songti SC","STSong","Noto Serif SC",serif}
+body{touch-action:manipulation}
+#threeCanvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.fx{position:fixed;inset:0;pointer-events:none}
+#mistVeil{z-index:7;opacity:0;background:radial-gradient(ellipse at 50% 48%,rgba(208,222,222,.34),rgba(132,151,155,.12) 44%,rgba(0,0,0,0) 78%);transition:opacity .68s ease;mix-blend-mode:screen}
+#grain{z-index:8;opacity:.027;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='4' seed='41' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E")}
+#vignette{z-index:9;background:radial-gradient(ellipse at 50% 48%,transparent 48%,rgba(0,0,0,.04) 75%,rgba(0,0,0,.24) 126%)}
+#letterbox{z-index:10;background:linear-gradient(#000 0 4.3vh,transparent 4.3vh calc(100% - 4.3vh),#000 calc(100% - 4.3vh))}
+#fade{z-index:11;background:#050708;opacity:0;transition:opacity 2.2s ease}
+#intro{position:fixed;z-index:40;inset:0;display:grid;place-items:center;transition:opacity 1.25s ease;background:radial-gradient(ellipse at 50% 45%,rgba(8,14,17,.08),rgba(5,8,9,.55) 120%)}
+.introbox{text-align:center;padding:24px}
+.era{font:10px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.5em;color:#b09a75;margin-bottom:24px}
+h1{font-size:clamp(56px,9vw,108px);font-weight:400;letter-spacing:.21em;text-indent:.21em;margin:0;text-shadow:0 8px 42px rgba(0,0,0,.8)}
+.subhead{font-size:12px;letter-spacing:.42em;color:rgba(235,225,207,.72);margin-top:16px}
+#enter{margin-top:50px;border:1px solid rgba(226,210,178,.36);border-radius:99px;background:rgba(10,14,15,.16);color:#e5dac5;padding:13px 31px;letter-spacing:.31em;cursor:pointer;backdrop-filter:blur(8px)}
+#enter:disabled{opacity:.35}
+#loadState{height:15px;margin-top:16px;font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.14em;color:rgba(220,209,189,.48)}
+#badge{position:fixed;z-index:25;left:4vw;top:6.7vh;font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.16em;color:rgba(237,228,210,.40)}
+#captionWrap{position:fixed;z-index:22;left:50%;bottom:9.7vh;transform:translateX(-50%);width:min(88vw,940px);text-align:center;pointer-events:none}
+#caption{display:inline-block;opacity:0;transform:translateY(7px);font-size:clamp(16px,1.9vw,26px);line-height:1.82;letter-spacing:.11em;color:#f1e9db;text-shadow:0 2px 14px rgba(0,0,0,.92);transition:opacity .5s ease,transform .5s ease}
+#caption.show{opacity:1;transform:none}
+#caption.poem{font-size:clamp(25px,3.5vw,45px);letter-spacing:.19em;line-height:1.7}
+#chapter{position:fixed;z-index:21;left:5vw;top:9vh;opacity:0;color:rgba(235,225,205,.55);font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.28em;transition:opacity .5s}
+#chapter.show{opacity:1}
+#sound{position:fixed;z-index:24;right:4vw;top:6.7vh;border:0;background:transparent;color:rgba(235,226,208,.48);font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.18em;cursor:pointer}
+#progress{position:fixed;z-index:24;left:0;bottom:0;height:1px;width:0;background:linear-gradient(90deg,#756249,#d8bd84)}
+#seal{position:fixed;z-index:23;right:7vw;bottom:10vh;opacity:0;border:1px solid rgba(160,55,42,.75);color:#bc5748;padding:8px 6px 5px;font-size:12px;letter-spacing:.13em;writing-mode:vertical-rl;transition:opacity 1.7s}
+#replay{position:fixed;z-index:25;left:50%;bottom:6.8vh;transform:translateX(-50%);opacity:0;pointer-events:none;border:1px solid rgba(225,211,184,.25);border-radius:99px;background:rgba(8,12,13,.35);color:rgba(238,228,209,.78);padding:10px 22px;letter-spacing:.22em;font-size:11px;transition:opacity 1s}
+#replay.show{opacity:1;pointer-events:auto}
+@media(max-width:640px){
+#letterbox{background:linear-gradient(#000 0 3vh,transparent 3vh calc(100% - 3vh),#000 calc(100% - 3vh))}
+#captionWrap{bottom:9vh;width:91vw}#caption{font-size:16px;line-height:1.9}#caption.poem{font-size:clamp(25px,7.2vw,37px)}
+#badge{left:4vw;top:4.6vh}#sound{right:4vw;top:4.6vh}#chapter{top:6.5vh}
+}
+</style>
+</head>
+<body>
+<canvas id="threeCanvas"></canvas>
+<div id="mistVeil" class="fx"></div><div id="grain" class="fx"></div><div id="vignette" class="fx"></div><div id="letterbox" class="fx"></div><div id="fade" class="fx"></div>
+<div id="intro"><div class="introbox"><div class="era">南宋 · 刘过</div><h1>少年游</h1><div class="subhead">纯 Three.js · 程序化电影世界</div><button id="enter" disabled>入 江</button><div id="loadState">生成江南世界中</div></div></div>
+<div id="badge">PURE THREE.JS · NO IMAGE ASSETS</div>
+<div id="chapter"></div><button id="sound">声音开启</button>
+<div id="captionWrap"><div id="caption"></div></div><div id="seal">少年游</div><button id="replay">再看一遍</button><div id="progress"></div>
+<audio id="voice" preload="auto" src="assets/v5/audio/narration.mp3"></audio>
+<audio id="score" preload="auto" src="assets/v4/audio/score.mp3"></audio>
+<script type="module" src="assets/three/main.js"></script>
+</body>
+</html>

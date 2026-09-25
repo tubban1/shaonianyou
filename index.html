@@ -12,11 +12,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%}.veil{position:fixed;inset:
 #words{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;padding:9vw;z-index:4}.card{text-align:center;max-width:920px;text-shadow:0 2px 18px #000;opacity:0;transform:translateY(12px);transition:opacity 1.8s,transform 1.8s}.card.show{opacity:1;transform:none}.poem{font-size:clamp(28px,5vw,58px);letter-spacing:.16em;line-height:1.8}.prose{font-size:clamp(18px,2.6vw,31px);letter-spacing:.12em;line-height:1.9;color:#d7d4ca}.small{display:block;margin-top:16px;font-size:12px;color:#9a978e;letter-spacing:.3em}
 #progress{position:fixed;left:0;bottom:0;height:1px;background:#c7b58c;width:0;z-index:6;opacity:.7}
 #sound{position:fixed;right:18px;top:18px;z-index:7;color:#aaa;font:12px sans-serif;letter-spacing:.1em;opacity:.6}
+@media(max-width:600px){.poem{font-size:clamp(27px,8vw,42px)}.prose{font-size:18px;line-height:2.05}.card{max-width:92vw}.title{font-size:54px}#sound{top:auto;bottom:18px;right:16px}} 
 </style></head>
 <body>
 <canvas id="c"></canvas><div class="veil"></div><div class="grain"></div>
 <div id="intro"><div class="introbox"><div class="seal">南宋 · 刘过</div><div class="title">少年游</div><div class="author">唐多令 · 芦叶满汀洲</div><button class="enter" id="enter">入 画</button></div></div>
-<div id="words"><div class="card" id="card"></div></div><div id="progress"></div><div id="sound">江声 · 风 · 古琴意象</div>
+<div id="words"><div class="card" id="card"></div></div><div id="progress"></div><div id="sound">声场 · 江风 · 古琴 · 沧桑旁白</div>
 <script>
 const cv=document.querySelector('#c'),ctx=cv.getContext('2d'),card=document.querySelector('#card'),intro=document.querySelector('#intro'),progress=document.querySelector('#progress');
 let W,H,dpr,t0=0,started=false,wind=0;
@@ -46,9 +47,24 @@ const cues=[
 [86,'poem','少年游。'],
 [94,'prose','场景可以复原，<br>人生不能复原。<span class="small">刘过 · 唐多令</span>']
 ],duration=102;let cue=-1;
-function tick(ts){if(!started)return;let s=(ts-t0)/1000;progress.style.width=Math.min(100,s/duration*100)+'%';let n=-1;for(let i=0;i<cues.length;i++)if(s>=cues[i][0])n=i;if(n!==cue){cue=n;card.classList.remove('show');setTimeout(()=>{if(cue>=0){card.className='card '+cues[cue][1];card.innerHTML=cues[cue][2];requestAnimationFrame(()=>card.classList.add('show'))}},650)}if(s<duration)requestAnimationFrame(tick)}
+const narration=[
+[0,'二十年，可以改变多少事？一个人从少年走到暮色，一座城换了人间。可江水，仍旧这样流。'],
+[10,'芦叶满汀洲，寒沙带浅流。'],
+[18,'二十年重过南楼。'],
+[25,'柳下系船犹未稳，能几日，又中秋。'],
+[35,'我们以为重回故地，便能遇见从前。后来才明白，故地可以重游，故人未必还在。'],
+[46,'黄鹤断矶头，故人今在否？'],
+[55,'旧江山，浑是新愁。'],
+[63,'酒还是可以买的。桂花也依旧会开。可有些东西，一旦走过，便再也回不来了。'],
+[74,'欲买桂花同载酒。'],
+[81,'终不似……'],
+[86,'少年游。']
+];let spoken=-1;
+function tick(ts){if(!started)return;let s=(ts-t0)/1000;progress.style.width=Math.min(100,s/duration*100)+'%';let n=-1;for(let i=0;i<cues.length;i++)if(s>=cues[i][0])n=i;if(n!==cue){cue=n;card.classList.remove('show');setTimeout(()=>{if(cue>=0){card.className='card '+cues[cue][1];card.innerHTML=cues[cue][2];requestAnimationFrame(()=>card.classList.add('show'))}},650)}let sn=-1;for(let i=0;i<narration.length;i++)if(s>=narration[i][0])sn=i;if(sn!==spoken){spoken=sn;if(sn>=0)speak(narration[sn][1],sn)}if(s<duration)requestAnimationFrame(tick)}
+function speak(text,i){if(!('speechSynthesis' in window))return; speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='zh-CN';u.rate=i===10?0.62:0.72;u.pitch=.68;u.volume=.9;let vs=speechSynthesis.getVoices(),v=vs.find(x=>/zh|Chinese|Ting|Yun|Liang/i.test(x.lang+' '+x.name));if(v)u.voice=v;speechSynthesis.speak(u)}
 function audio(){
-let A=new (window.AudioContext||window.webkitAudioContext)(),master=A.createGain();master.gain.value=.18;master.connect(A.destination);
+let A=new (window.AudioContext||window.webkitAudioContext)(),master=A.createGain(),comp=A.createDynamicsCompressor();master.gain.value=.17;master.connect(comp).connect(A.destination);
+let river=A.createOscillator(),rg=A.createGain();river.type='sine';river.frequency.value=48;rg.gain.value=.018;river.connect(rg).connect(master);river.start();
 let noise=A.createBuffer(1,A.sampleRate*2,A.sampleRate),d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);let src=A.createBufferSource();src.buffer=noise;src.loop=true;let f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=480;let ng=A.createGain();ng.gain.value=.055;src.connect(f).connect(ng).connect(master);src.start();
 [146.83,220,293.66].forEach((hz,j)=>{let o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=hz;g.gain.value=.012/(j+1);o.connect(g).connect(master);o.start();setInterval(()=>{let now=A.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(.003,now);g.gain.linearRampToValueAtTime(.018/(j+1),now+2);g.gain.exponentialRampToValueAtTime(.002,now+8)},12000+j*3900)});
 }

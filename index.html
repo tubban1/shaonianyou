@@ -3,201 +3,224 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#030506">
-<title>少年游 · 唐多令</title>
-<link rel="preload" as="image" href="assets/scenes/scene01_river.webp">
+<meta name="theme-color" content="#050708">
+<title>少年游 · 二十年一江故梦</title>
+<link rel="preload" as="image" href="assets/v4/scenes/scene01.webp">
+<link rel="preload" as="audio" href="assets/v4/audio/narration.mp3">
 <style>
+:root{--ivory:#e8e0cf;--muted:#aaa394;--gold:#a98a58;--red:#8d3026}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020304;color:#eee;font-family:"Songti SC","STSong","Noto Serif SC",serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050708;color:var(--ivory);font-family:"Songti SC","STSong","Noto Serif SC",serif}
 body{touch-action:manipulation}
-#world{position:fixed;inset:0;width:100%;height:100%;display:block;background:#050708}
-.fx{position:fixed;inset:0;pointer-events:none}
-#grain{z-index:5;opacity:.072;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' seed='9' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
-#vignette{z-index:6;background:radial-gradient(ellipse at 50% 47%,transparent 20%,rgba(0,0,0,.16) 57%,rgba(0,0,0,.82) 126%)}
-#letterbox{z-index:7;background:linear-gradient(#000 0 5.2vh,transparent 5.2vh calc(100% - 5.2vh),#000 calc(100% - 5.2vh))}
-#ink{z-index:8;opacity:0;filter:blur(14px);transition:opacity .9s ease;background:radial-gradient(ellipse at 20% 58%,#000 0 14%,transparent 35%),radial-gradient(ellipse at 78% 42%,#000 0 16%,transparent 39%),radial-gradient(ellipse at 49% 50%,rgba(0,0,0,.94) 0 20%,transparent 58%)}
-#intro{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(circle at 50% 36%,#24302f 0,#101617 34%,#040607 76%);transition:opacity 1.8s}
-.introbox{text-align:center;padding:24px}
-.kicker{font-size:11px;letter-spacing:.52em;color:#a58f69;margin-bottom:25px}
-h1{font-size:clamp(52px,9vw,102px);font-weight:400;letter-spacing:.23em;margin:0 -.23em 0 0;text-shadow:0 8px 42px #000}
-.sub{font-size:12px;letter-spacing:.48em;color:#a9aaa4;margin-top:17px}
-.enter{margin-top:54px;padding:13px 30px;border-radius:99px;border:1px solid rgba(220,206,174,.35);background:rgba(255,255,255,.025);color:#ded4bd;letter-spacing:.28em;cursor:pointer;backdrop-filter:blur(10px)}
-#loading{height:14px;margin-top:18px;color:rgba(213,204,184,.45);font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.18em}
-#copy{position:fixed;inset:0;z-index:13;pointer-events:none}
-.caption{position:absolute;opacity:0;filter:blur(5px);transition:opacity 1.45s ease,filter 1.45s ease,transform 1.45s ease;text-shadow:0 4px 30px #000,0 1px 6px #000}
-.caption.show{opacity:1;filter:none}
-.center{left:50%;top:50%;width:min(88vw,980px);text-align:center;transform:translate(-50%,-43%)}
-.center.show{transform:translate(-50%,-50%)}
-.left{left:8vw;top:22vh;width:min(74vw,800px);transform:translateY(12px)}
-.left.show{transform:none}
-.right{right:8vw;top:20vh;width:min(72vw,760px);text-align:right;transform:translateY(12px)}
-.right.show{transform:none}
-.poem{font-size:clamp(31px,5vw,62px);line-height:1.78;letter-spacing:.18em;color:#e7dfcd}
-.narration{font-size:clamp(18px,2.3vw,29px);line-height:2.08;letter-spacing:.12em;color:#d7d0c1}
-.whisper{display:block;margin-top:16px;font-size:clamp(11px,1.05vw,14px);letter-spacing:.31em;color:#9a9487}
-.vertical{writing-mode:vertical-rl;text-orientation:mixed;line-height:1.95;letter-spacing:.26em}
-#chapter{position:fixed;z-index:14;left:28px;bottom:8vh;color:rgba(222,213,194,.48);font:10px/1.4 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.23em;writing-mode:vertical-rl;transition:opacity .8s}
-#sound{position:fixed;z-index:16;right:25px;top:7vh;border:0;background:transparent;color:rgba(226,220,205,.52);font:10px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.16em;cursor:pointer}
-#progress{position:fixed;z-index:17;left:0;bottom:0;height:1px;width:0;background:linear-gradient(90deg,#5c4a31,#d4bb83);box-shadow:0 0 14px rgba(201,177,120,.4);transition:width .18s linear}
-#seal{position:fixed;z-index:15;right:7vw;bottom:9vh;opacity:0;transition:opacity 2.7s;border:1px solid rgba(160,54,42,.8);color:#b64e40;padding:8px 6px 5px;font-size:12px;letter-spacing:.13em;writing-mode:vertical-rl;background:rgba(30,7,5,.14)}
+#film{position:fixed;inset:0;background:#050708;overflow:hidden}
+.plate{position:absolute;inset:-4%;opacity:0;background-size:cover;background-position:center;will-change:transform,opacity;transition:opacity 1.75s cubic-bezier(.22,.61,.36,1)}
+.plate.active{opacity:1}
+#grade,#grain,#vignette,#letterbox,#fade,#fx{position:absolute;inset:0;pointer-events:none}
+#grade{z-index:4;mix-blend-mode:color;background:linear-gradient(180deg,rgba(4,14,18,.09),rgba(3,7,8,.04) 45%,rgba(0,0,0,.12))}
+#grain{z-index:5;opacity:.065;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' seed='13' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
+#vignette{z-index:6;background:radial-gradient(ellipse at 50% 46%,transparent 27%,rgba(0,0,0,.16) 64%,rgba(0,0,0,.66) 118%)}
+#letterbox{z-index:7;background:linear-gradient(#000 0 4.8vh,transparent 4.8vh calc(100% - 4.8vh),#000 calc(100% - 4.8vh))}
+#fade{z-index:9;background:#030405;opacity:0;transition:opacity 2.4s ease}
+#fx{z-index:3;width:100%;height:100%}
+
+#intro{position:fixed;inset:0;z-index:40;display:grid;place-items:center;overflow:hidden;background:#050708;transition:opacity 1.35s ease}
+#introBg{position:absolute;inset:-5%;background:url("assets/v4/scenes/scene01.webp") center/cover;filter:brightness(.38) saturate(.68);transform:scale(1.08)}
+#intro::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,rgba(0,0,0,.08),rgba(0,0,0,.72) 110%)}
+.introbox{position:relative;z-index:2;text-align:center;padding:28px 22px}
+.era{font:10px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.48em;color:#a9916c;margin-bottom:24px}
+h1{margin:0;font-size:clamp(56px,9vw,110px);font-weight:400;letter-spacing:.2em;text-indent:.2em;text-shadow:0 8px 42px rgba(0,0,0,.78)}
+.subtitle{margin-top:16px;font-size:12px;letter-spacing:.42em;color:rgba(226,218,201,.7)}
+.enter{margin-top:52px;border:1px solid rgba(219,204,173,.34);border-radius:99px;background:rgba(255,255,255,.025);color:#ded4c1;padding:13px 31px;letter-spacing:.32em;cursor:pointer;backdrop-filter:blur(10px)}
+.enter:disabled{opacity:.35;cursor:default}
+#loadState{height:15px;margin-top:17px;font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.14em;color:rgba(211,201,181,.43)}
+
+#subtitleBox{position:fixed;z-index:20;left:50%;bottom:10.2vh;transform:translateX(-50%);width:min(86vw,920px);text-align:center;pointer-events:none}
+#subtitleText{display:inline-block;opacity:0;transform:translateY(9px);filter:blur(3px);font-size:clamp(17px,2.15vw,28px);line-height:1.78;letter-spacing:.13em;color:#eee6d7;text-shadow:0 3px 18px rgba(0,0,0,.96),0 1px 4px #000;transition:opacity .7s ease,transform .7s ease,filter .7s ease}
+#subtitleText.show{opacity:1;transform:none;filter:none}
+#subtitleText.poem{font-size:clamp(25px,3.6vw,46px);letter-spacing:.2em;line-height:1.7}
+#chapter{position:fixed;z-index:19;left:5.2vw;top:9vh;opacity:0;color:rgba(233,222,200,.58);font:10px/1.4 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.28em;transition:opacity .7s ease}
+#chapter.show{opacity:1}
+#meta{position:fixed;z-index:19;right:4.6vw;top:7.7vh;color:rgba(225,215,195,.44);font:9px -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;letter-spacing:.18em}
+#sound{border:0;background:transparent;color:inherit;font:inherit;letter-spacing:inherit;cursor:pointer}
+#progress{position:fixed;z-index:22;left:0;bottom:0;height:1px;width:0;background:linear-gradient(90deg,#5f513c,#d0b47c);box-shadow:0 0 12px rgba(203,177,118,.35)}
+#seal{position:fixed;z-index:21;right:7vw;bottom:10vh;opacity:0;border:1px solid rgba(154,51,39,.75);color:#b14d40;padding:8px 6px 5px;font-size:12px;letter-spacing:.12em;writing-mode:vertical-rl;background:rgba(22,7,6,.22);transition:opacity 2s ease}
+#replay{position:fixed;z-index:25;left:50%;bottom:7vh;transform:translateX(-50%);opacity:0;pointer-events:none;border:1px solid rgba(220,207,180,.25);border-radius:99px;background:rgba(7,8,8,.38);color:rgba(230,221,204,.75);padding:10px 22px;letter-spacing:.23em;font-size:11px;transition:opacity 1s ease}
+#replay.show{opacity:1;pointer-events:auto}
+
 @media(max-width:640px){
-#letterbox{background:linear-gradient(#000 0 3.3vh,transparent 3.3vh calc(100% - 3.3vh),#000 calc(100% - 3.3vh))}
-.center{width:90vw}.left{left:7vw;top:20vh;width:86vw}.right{right:6vw;top:19vh;width:86vw}
-.poem{font-size:clamp(29px,8vw,44px);line-height:1.9}.narration{font-size:17px;line-height:2.12}
-#chapter{left:13px;bottom:6.3vh}#sound{right:14px;top:4.8vh}
+#letterbox{background:linear-gradient(#000 0 3vh,transparent 3vh calc(100% - 3vh),#000 calc(100% - 3vh))}
+#subtitleBox{bottom:9vh;width:91vw}
+#subtitleText{font-size:17px;line-height:1.9;letter-spacing:.1em}
+#subtitleText.poem{font-size:clamp(25px,7.4vw,37px)}
+#chapter{left:5vw;top:6.5vh}
+#meta{right:4vw;top:4.8vh}
+#seal{right:6vw;bottom:9vh}
 }
 </style>
 </head>
 <body>
-<canvas id="world"></canvas>
-<div id="grain" class="fx"></div><div id="vignette" class="fx"></div><div id="letterbox" class="fx"></div><div id="ink" class="fx"></div>
-<div id="intro"><div class="introbox"><div class="kicker">南宋 · 刘过</div><h1>少年游</h1><div class="sub">唐多令 · 芦叶满汀洲</div><button id="enter" class="enter">入 画</button><div id="loading">电影场景载入中</div></div></div>
-<div id="copy"><div id="caption" class="caption"></div></div>
-<div id="chapter">江上初见</div><button id="sound">声音开启</button><div id="progress"></div><div id="seal">少年游</div>
+<div id="film">
+  <div id="plateA" class="plate active"></div>
+  <div id="plateB" class="plate"></div>
+  <canvas id="fx"></canvas>
+  <div id="grade"></div><div id="grain"></div><div id="vignette"></div><div id="letterbox"></div><div id="fade"></div>
+</div>
+
+<div id="intro">
+  <div id="introBg"></div>
+  <div class="introbox">
+    <div class="era">南宋 · 刘过</div>
+    <h1>少年游</h1>
+    <div class="subtitle">唐多令 · 芦叶满汀洲</div>
+    <button class="enter" id="enter" disabled>入 江</button>
+    <div id="loadState">电影素材载入中</div>
+  </div>
+</div>
+
+<div id="chapter"></div>
+<div id="meta"><button id="sound">声音开启</button></div>
+<div id="subtitleBox"><div id="subtitleText"></div></div>
+<div id="seal">少年游</div>
+<button id="replay">再看一遍</button>
+<div id="progress"></div>
+
+<audio id="voice" preload="auto" src="assets/v4/audio/narration.mp3"></audio>
+<audio id="score" preload="auto" src="assets/v4/audio/score.mp3"></audio>
+
 <script>
-const cv=document.querySelector('#world'),ctx=cv.getContext('2d'),caption=document.querySelector('#caption'),intro=document.querySelector('#intro'),ink=document.querySelector('#ink'),chapter=document.querySelector('#chapter'),soundBtn=document.querySelector('#sound'),progress=document.querySelector('#progress'),seal=document.querySelector('#seal'),loading=document.querySelector('#loading');
-let W,H,D,started=false,muted=false,audioCtx=null,ambGain=null,currentVoice=null,currentSegment=-1,currentShot=0,previousShot=null,shotStarted=performance.now(),transitionStarted=0,transitionMs=1350,timers=[];
-const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,ease=t=>t*t*(3-2*t),rand=(a,b)=>a+Math.random()*(b-a);
-function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0)}addEventListener('resize',resize);resize();
-
-const sceneFiles=['scene01_river.webp','scene02_tower.webp','scene03_mooring.webp','scene04_ruin.webp','scene05_memory.webp','scene06_wine.webp','scene07_departure.webp'];
-const plates=sceneFiles.map(n=>{const im=new Image();im.decoding='async';im.src='assets/scenes/'+n;return im});
-Promise.all(plates.map(im=>im.decode().catch(()=>{}))).then(()=>{loading.textContent='场景已就绪'});
-
-const shots=[
- {title:'江上初见',img:0,s0:1.095,s1:1.035,x0:-.025,x1:.018,y0:.015,y1:-.006,t:13,grade:'cold',fx:'mist'},
- {title:'芦洲寒水',img:0,s0:1.16,s1:1.10,x0:-.045,x1:.026,y0:.085,y1:.035,t:8,grade:'cold',fx:'reeds'},
- {title:'重过南楼',img:1,s0:1.08,s1:1.15,x0:-.055,x1:.018,y0:.015,y1:-.012,t:9,grade:'neutral',fx:'rain'},
- {title:'柳下系舟',img:2,s0:1.11,s1:1.055,x0:-.035,x1:.026,y0:.01,y1:-.008,t:10,grade:'cold',fx:'willow'},
- {title:'旧梦回潮',img:4,s0:1.07,s1:1.13,x0:.025,x1:-.018,y0:.012,y1:-.01,t:16,grade:'warm',fx:'memory'},
- {title:'黄鹤断矶',img:3,s0:1.08,s1:1.035,x0:-.035,x1:.018,y0:.015,y1:-.005,t:12,grade:'cold',fx:'rain'},
- {title:'旧江山',img:3,s0:1.18,s1:1.10,x0:.05,x1:-.04,y0:.035,y1:.005,t:11,grade:'cold',fx:'mist'},
- {title:'桂花载酒',img:5,s0:1.085,s1:1.13,x0:-.018,x1:.024,y0:.01,y1:-.015,t:12,grade:'warm',fx:'petals'},
- {title:'终不似',img:6,s0:1.12,s1:1.07,x0:.018,x1:-.018,y0:.018,y1:0,t:8,grade:'cold',fx:'ghost'},
- {title:'少年游',img:6,s0:1.06,s1:1.0,x0:-.012,x1:.012,y0:.005,y1:-.01,t:12,grade:'cold',fx:'mist'},
- {title:'余音',img:6,s0:1.02,s1:.97,x0:.006,x1:-.006,y0:0,y1:-.015,t:18,grade:'cold',fx:'after'}
+const sceneFiles=Array.from({length:9},(_,i)=>'assets/v4/scenes/scene'+String(i+1).padStart(2,'0')+'.webp');
+const sceneCfg=[
+ {img:0,title:'江上初见',pos:'50% 51%',from:'scale(1.105) translate3d(-1.2%,1.0%,0)',to:'scale(1.035) translate3d(1.0%,-.5%,0)',dur:13000,fx:'mist'},
+ {img:1,title:'芦洲寒水',pos:'50% 52%',from:'scale(1.13) translate3d(-1.8%,1.5%,0)',to:'scale(1.055) translate3d(1.2%,-.3%,0)',dur:3900,fx:'reeds'},
+ {img:2,title:'重过南楼',pos:'48% 51%',from:'scale(1.06) translate3d(-1%,.6%,0)',to:'scale(1.13) translate3d(1.1%,-.7%,0)',dur:3700,fx:'rain'},
+ {img:3,title:'柳下系舟',pos:'56% 51%',from:'scale(1.11) translate3d(1.4%,.5%,0)',to:'scale(1.045) translate3d(-.6%,-.4%,0)',dur:5800,fx:'willow'},
+ {img:4,title:'旧梦回潮',pos:'50% 52%',from:'scale(1.06) translate3d(-.8%,.7%,0)',to:'scale(1.115) translate3d(.7%,-.5%,0)',dur:10800,fx:'petals'},
+ {img:5,title:'黄鹤断矶',pos:'51% 52%',from:'scale(1.09) translate3d(-1.1%,.8%,0)',to:'scale(1.035) translate3d(.7%,-.3%,0)',dur:8700,fx:'rain'},
+ {img:6,title:'旧江山',pos:'52% 50%',from:'scale(1.12) translate3d(1.3%,.8%,0)',to:'scale(1.045) translate3d(-.9%,-.5%,0)',dur:2900,fx:'mist'},
+ {img:7,title:'桂花载酒',pos:'52% 52%',from:'scale(1.08) translate3d(-.5%,.4%,0)',to:'scale(1.135) translate3d(.6%,-.4%,0)',dur:3300,fx:'petals'},
+ {img:8,title:'终不似',pos:'50% 52%',from:'scale(1.11) translate3d(1.1%,.6%,0)',to:'scale(1.025) translate3d(-.4%,-.4%,0)',dur:9500,fx:'mist'}
+];
+const sceneCues=[
+ {t:0,s:0},{t:13.121,s:1},{t:16.852,s:2},{t:20.563,s:3},{t:26.322,s:4},
+ {t:37.087,s:5},{t:45.834,s:6},{t:48.711,s:7},{t:52.031,s:8}
+];
+const captions=[
+ {t:0,e:1.55,text:'二十年。',poem:false},
+ {t:1.70,e:3.45,text:'可以改变多少事。',poem:false},
+ {t:3.75,e:6.45,text:'一个人，从少年，走到暮色。',poem:false},
+ {t:6.71,e:9.75,text:'一座城，换了人间。',poem:false},
+ {t:10.23,e:12.55,text:'可江水，仍旧这样流。',poem:false},
+ {t:13.12,e:16.20,text:'芦叶满汀洲，寒沙带浅流。',poem:true},
+ {t:16.85,e:20.05,text:'二十年重过南楼。',poem:true},
+ {t:20.56,e:25.72,text:'柳下系船犹未稳，能几日，又中秋。',poem:true},
+ {t:26.32,e:29.95,text:'我们总以为，回到旧地，就能把从前，也一并找回来。',poem:false},
+ {t:30.42,e:34.55,text:'后来才知道。故地，可以重游。故人，却未必还在。',poem:false},
+ {t:37.08,e:40.80,text:'黄鹤断矶头。',poem:true},
+ {t:41.40,e:44.90,text:'故人……今在否？',poem:true},
+ {t:45.83,e:48.40,text:'旧江山，浑是新愁。',poem:true},
+ {t:48.71,e:51.70,text:'欲买桂花同载酒。',poem:true},
+ {t:52.03,e:54.25,text:'终不似。',poem:true},
+ {t:54.53,e:58.60,text:'少年游。',poem:true},
+ {t:59.11,e:61.54,text:'场景还在。人生，却早已走远了。',poem:false}
 ];
 
-const segments=[
- {file:'01_twenty_years.mp3',shot:0,rate:1,gap:1.25,cls:'left narration',html:'二十年……<br>可以改变多少事。'},
- {file:'02_river.mp3',shot:0,rate:1,gap:1.25,cls:'left narration',html:'一个人，从少年走到暮色。<br>一座城，换了人间。<span class="whisper">可江水……仍旧这样流。</span>'},
- {file:'03_reeds.mp3',shot:1,rate:1,gap:1.15,cls:'center poem',html:'芦叶满汀洲，<br>寒沙带浅流。'},
- {file:'04_south_tower.mp3',shot:2,rate:1,gap:1.35,cls:'right poem vertical',html:'二十年重过南楼。'},
- {file:'05_willow.mp3',shot:3,rate:1,gap:1.3,cls:'center poem',html:'柳下系船犹未稳，<br>能几日，又中秋。'},
- {file:'06_return.mp3',shot:4,rate:1,gap:1.15,cls:'left narration',html:'我们总以为，回到旧地，<br>就能把从前，也一并找回来。'},
- {file:'07_truth.mp3',shot:4,rate:1,gap:1.5,cls:'right narration',html:'后来才知道——<br>故地，可以重游。<span class="whisper">故人……却未必还在。</span>'},
- {file:'08_rock.mp3',shot:5,rate:1,gap:1.0,cls:'left poem vertical',html:'黄鹤断矶头。'},
- {file:'09_oldfriend.mp3',shot:5,rate:1,gap:1.55,cls:'center poem',html:'故人……今在否？'},
- {file:'10_new_sorrow.mp3',shot:6,rate:1,gap:1.3,cls:'right poem vertical',html:'旧江山浑是新愁。'},
- {file:'11_wine.mp3',shot:7,rate:1,gap:1.7,cls:'center poem',html:'欲买桂花同载酒。'},
- {file:'12_not_same.mp3',shot:8,rate:1,gap:2.1,cls:'center poem',html:'终不似……'},
- {file:'13_youth.mp3',shot:9,rate:1,gap:2.5,cls:'center poem',html:'少年游。'},
- {file:'14_epilogue.mp3',shot:10,rate:1,gap:4.0,cls:'center narration',html:'场景还在。<br>人生……却早已走远了。'}
-];
-const voices=segments.map(s=>{const a=new Audio('assets/audio/'+s.file);a.preload='auto';a.playsInline=true;a.preservesPitch=true;a.volume=.98;return a});
-const music={intro:new Audio('assets/audio/bgm_intro.mp3'),memory:new Audio('assets/audio/bgm_memory.mp3'),rise:new Audio('assets/audio/bgm_rise.mp3')};
-Object.values(music).forEach(a=>{a.preload='auto';a.loop=true;a.volume=0});
+const A=document.querySelector('#plateA'),B=document.querySelector('#plateB'),fx=document.querySelector('#fx'),
+intro=document.querySelector('#intro'),enter=document.querySelector('#enter'),loadState=document.querySelector('#loadState'),
+voice=document.querySelector('#voice'),score=document.querySelector('#score'),sub=document.querySelector('#subtitleText'),
+chapter=document.querySelector('#chapter'),progress=document.querySelector('#progress'),sound=document.querySelector('#sound'),
+seal=document.querySelector('#seal'),fade=document.querySelector('#fade'),replay=document.querySelector('#replay');
+const ctx=fx.getContext('2d');
+let W=0,H=0,D=1,front=A,back=B,currentScene=-1,currentCaption=-1,started=false,muted=false,ended=false,env=null;
+let particles=[];
+function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);fx.width=W*D;fx.height=H*D;fx.style.width=W+'px';fx.style.height=H+'px';ctx.setTransform(D,0,0,D,0,0)}
+addEventListener('resize',resize);resize();
 
-const mist=Array.from({length:9},(_,i)=>({y:.39+i*.055,w:.2+i*.035,p:rand(0,6.28),s:rand(.65,1.25)}));
-const reeds=Array.from({length:95},()=>({x:Math.random(),h:rand(.11,.34),p:rand(0,6.28),a:rand(.1,.34),d:rand(.7,1.5)}));
-const petals=Array.from({length:36},()=>({x:Math.random(),y:Math.random(),p:rand(0,6.28),s:rand(.65,1.45)}));
-const rain=Array.from({length:115},(_,i)=>({x:(i*83)%997/997,y:(i*47)%991/991,l:rand(10,18)}));
-
-function coverRect(im,scale,px,py){
- const iw=im.naturalWidth||1600,ih=im.naturalHeight||900,base=Math.max(W/iw,H/ih)*scale,dw=iw*base,dh=ih*base;
- const x=(W-dw)/2+px*W,y=(H-dh)/2+py*H; return [x,y,dw,dh];
+function makeParticles(type){
+ const n=type==='rain'?125:type==='petals'?38:type==='reeds'?70:28;
+ return Array.from({length:n},()=>({x:Math.random(),y:Math.random(),z:.4+Math.random()*1.2,p:Math.random()*6.28,s:.45+Math.random()*1.1}));
 }
-function drawPlate(shot,alpha=1,elapsed=0){
- const im=plates[shot.img]; if(!im||!im.complete)return;
- const q=ease(clamp(elapsed/(shot.t*1000))),sc=lerp(shot.s0,shot.s1,q),px=lerp(shot.x0,shot.x1,q),py=lerp(shot.y0,shot.y1,q);
- const r=coverRect(im,sc,px,py);ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(im,...r);ctx.restore();
+function switchScene(i){
+ if(i===currentScene)return;
+ currentScene=i;const c=sceneCfg[i];
+ back.style.backgroundImage='url("'+sceneFiles[c.img]+'")';back.style.backgroundPosition=c.pos;
+ back.classList.add('active');front.classList.remove('active');
+ back.getAnimations().forEach(a=>a.cancel());
+ back.animate([{transform:c.from},{transform:c.to}],{duration:c.dur,fill:'forwards',easing:'linear'});
+ [front,back]=[back,front];
+ particles=makeParticles(c.fx);
+ chapter.textContent=c.title;chapter.classList.add('show');setTimeout(()=>chapter.classList.remove('show'),1700);
 }
-function grade(kind,alpha=1){
- ctx.save();ctx.globalAlpha=alpha;
- if(kind==='warm'){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(101,47,18,.10)');g.addColorStop(.58,'rgba(210,122,45,.08)');g.addColorStop(1,'rgba(24,8,3,.14)');ctx.fillStyle=g}
- else if(kind==='neutral'){ctx.fillStyle='rgba(4,12,15,.08)'}
- else{let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(3,19,31,.13)');g.addColorStop(.6,'rgba(5,18,25,.06)');g.addColorStop(1,'rgba(0,4,7,.16)');ctx.fillStyle=g}
- ctx.fillRect(0,0,W,H);ctx.restore();
+function captionAt(t){
+ let idx=-1;for(let i=0;i<captions.length;i++)if(t>=captions[i].t&&t<captions[i].e)idx=i;
+ if(idx===currentCaption)return;
+ currentCaption=idx;sub.classList.remove('show');
+ if(idx<0){setTimeout(()=>sub.textContent='',420);return}
+ setTimeout(()=>{sub.textContent=captions[idx].text;sub.className=captions[idx].poem?'poem':'';requestAnimationFrame(()=>sub.classList.add('show'))},210);
 }
-function drawMist(ms,a=.16){ctx.save();ctx.globalCompositeOperation='screen';mist.forEach((m,i)=>{let x=W*(.5+Math.sin(ms*.000035*m.s+m.p)*.18),y=H*m.y;ctx.globalAlpha=a*(.42+i*.035);ctx.filter='blur('+(16+i*2)+'px)';ctx.fillStyle='#cbd4d0';ctx.beginPath();ctx.ellipse(x,y,W*m.w,H*.018,0,0,7);ctx.fill()});ctx.restore();ctx.filter='none'}
-function drawReeds(ms){ctx.save();ctx.filter='blur(1px)';reeds.forEach(r=>{let x=r.x*W,y=H*(.83+r.d*.11),h=r.h*H,sw=Math.sin(ms*.00045+r.p)*13*r.d;ctx.strokeStyle='rgba(31,35,31,'+(r.a+.16)+')';ctx.lineWidth=1+r.d*.6;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+sw*.35,y-h*.52,x+sw,y-h);ctx.stroke();ctx.fillStyle='rgba(110,101,77,'+(r.a+.08)+')';ctx.beginPath();ctx.ellipse(x+sw,y-h,10*r.d,2.1*r.d,-.24,0,7);ctx.fill()});ctx.restore()}
-function drawWillow(ms){ctx.save();ctx.filter='blur(1.4px)';ctx.strokeStyle='rgba(8,12,10,.84)';ctx.lineCap='round';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(W*.94,-20);ctx.bezierCurveTo(W*.83,H*.14,W*.88,H*.31,W*.76,H*.57);ctx.stroke();ctx.lineWidth=1.35;for(let i=0;i<34;i++){let sx=W*(.79+i*.006),sy=H*(.02+(i%7)*.023);ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo(sx-30,H*.29,sx-20+Math.sin(ms*.0006+i)*9,H*(.53+(i%4)*.03));ctx.stroke()}ctx.restore()}
-function drawRain(ms,a=.11){ctx.save();ctx.strokeStyle='rgba(216,224,225,'+a+')';ctx.lineWidth=.7;rain.forEach((r,i)=>{let x=((r.x*W+ms*.028*(1+i%3))%(W+80))-40,y=((r.y*H+ms*.075*(1+i%2))%(H+40))-20;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-4,y+r.l);ctx.stroke()});ctx.restore()}
-function drawPetals(ms,a=.55){ctx.save();petals.forEach(p=>{let x=(p.x*W+ms*.008*p.s)%W,y=(p.y*H+ms*.013*p.s)%H;ctx.translate(x,y);ctx.rotate(p.p+ms*.00015);ctx.fillStyle='rgba(226,181,97,'+(a*.62)+')';ctx.beginPath();ctx.ellipse(0,0,3.4*p.s,1.6*p.s,0,0,7);ctx.fill();ctx.setTransform(D,0,0,D,0,0)});ctx.restore()}
-function drawGhost(ms){ctx.save();let a=.045+.02*Math.sin(ms*.0012);ctx.globalCompositeOperation='screen';ctx.globalAlpha=a;let g=ctx.createRadialGradient(W*.62,H*.47,0,W*.62,H*.47,W*.18);g.addColorStop(0,'rgba(208,142,83,.8)');g.addColorStop(1,'rgba(208,142,83,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore()}
-function fxFor(shot,ms){
- if(['mist','after','memory'].includes(shot.fx))drawMist(ms,shot.fx==='after'?.12:.15);
- if(shot.fx==='reeds')drawReeds(ms);
- if(shot.fx==='willow')drawWillow(ms);
- if(shot.fx==='rain')drawRain(ms,.10);
- if(shot.fx==='petals'){drawMist(ms,.08);drawPetals(ms,.62)}
- if(shot.fx==='memory'){drawPetals(ms,.23)}
- if(shot.fx==='ghost'){drawMist(ms,.18);drawGhost(ms)}
- if(shot.fx==='after'){ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(0,0,W,H)}
-}
-function render(ms){
- let elapsed=ms-shotStarted,shot=shots[currentShot],fade=transitionStarted?clamp((ms-transitionStarted)/transitionMs):1;
+function sceneAt(t){let s=0;for(const c of sceneCues)if(t>=c.t)s=c.s;return s}
+function drawFX(ms){
  ctx.clearRect(0,0,W,H);
- if(previousShot&&fade<1){drawPlate(previousShot,1-fade,elapsed);grade(previousShot.grade,1-fade)}
- drawPlate(shot,fade,elapsed);grade(shot.grade,fade);fxFor(shot,ms);
- if(fade>=1){previousShot=null;transitionStarted=0}
- requestAnimationFrame(render)
+ if(currentScene<0)return;
+ const type=sceneCfg[currentScene].fx;
+ if(type==='mist'){
+  ctx.save();ctx.globalCompositeOperation='screen';ctx.filter='blur(18px)';
+  for(let i=0;i<6;i++){let x=W*(.5+Math.sin(ms*.000035+i*1.7)*.22),y=H*(.37+i*.073);ctx.globalAlpha=.035+i*.004;ctx.fillStyle='#d5ddd9';ctx.beginPath();ctx.ellipse(x,y,W*(.22+i*.025),H*.018,0,0,7);ctx.fill()}ctx.restore();ctx.filter='none';
+ }
+ if(type==='rain'){
+  ctx.strokeStyle='rgba(215,222,223,.13)';ctx.lineWidth=.65;
+  for(const p of particles){let x=((p.x*W+ms*.035*p.z)%(W+50))-25,y=((p.y*H+ms*.09*p.s)%(H+50))-25;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-4,y+15*p.z);ctx.stroke()}
+ }
+ if(type==='petals'){
+  for(const p of particles){let x=(p.x*W+ms*.009*p.s)%W,y=(p.y*H+ms*.014*p.s)%H;ctx.save();ctx.translate(x,y);ctx.rotate(p.p+ms*.0002);ctx.fillStyle='rgba(222,178,103,.34)';ctx.beginPath();ctx.ellipse(0,0,3.2*p.z,1.35*p.z,0,0,7);ctx.fill();ctx.restore()}
+ }
+ if(type==='reeds'){
+  ctx.save();ctx.filter='blur(.7px)';
+  for(const p of particles){let x=p.x*W,y=H*(.8+p.z*.13),h=H*(.12+p.s*.12),sw=Math.sin(ms*.0005+p.p)*9*p.z;ctx.strokeStyle='rgba(34,37,31,.34)';ctx.lineWidth=.8+p.z*.45;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+sw*.35,y-h*.55,x+sw,y-h);ctx.stroke()}ctx.restore();
+ }
+ if(type==='willow'){
+  ctx.save();ctx.filter='blur(1px)';ctx.strokeStyle='rgba(6,9,7,.48)';ctx.lineWidth=1.3;
+  for(let i=0;i<29;i++){let x=W*(.77+i*.007);ctx.beginPath();ctx.moveTo(x,-10);ctx.quadraticCurveTo(x-35,H*.24,x-18+Math.sin(ms*.0005+i)*7,H*(.48+(i%5)*.035));ctx.stroke()}ctx.restore();
+ }
 }
-requestAnimationFrame(render);
+function createEnv(){
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ const ac=new AC(),gain=ac.createGain(),filter=ac.createBiquadFilter(),src=ac.createBufferSource();
+ const b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(.55+.45*Math.sin(i*.00013));
+ src.buffer=b;src.loop=true;filter.type='lowpass';filter.frequency.value=560;gain.gain.value=.012;src.connect(filter).connect(gain).connect(ac.destination);src.start();env={ac,gain}
+}
+function soundtrack(t){
+ let v=.21;if(t>25&&t<36)v=.25;if(t>36&&t<48)v=.18;if(t>52)v=.13;if(t>59)v=.08;
+ score.volume=muted?0:v;voice.volume=muted?0:1;if(env)env.gain.gain.setTargetAtTime(muted?0:.012,env.ac.currentTime,.18);
+}
+function frame(ms){
+ drawFX(ms);
+ if(started&&!ended){
+  const t=voice.currentTime;
+  switchScene(sceneAt(t));captionAt(t);soundtrack(t);
+  progress.style.width=Math.min(100,t/61.5445*100)+'%';
+  if(t>54.3)seal.style.opacity=1;
+ }
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 
-function showCaption(i){caption.classList.remove('show');setTimeout(()=>{caption.className='caption '+segments[i].cls;caption.innerHTML=segments[i].html;requestAnimationFrame(()=>caption.classList.add('show'))},250)}
-function setShot(i){
- if(i===currentShot&&currentSegment>=0)return;
- previousShot=shots[currentShot];currentShot=i;shotStarted=performance.now();transitionStarted=performance.now();
- ink.style.opacity=.68;setTimeout(()=>ink.style.opacity=0,620);
- chapter.style.opacity=0;setTimeout(()=>{chapter.textContent=shots[i].title;chapter.style.opacity=.72},430);
- if(i===9)seal.style.opacity=1;
- if(i===2)chime();
+async function preload(){
+ const imgs=sceneFiles.map(src=>new Promise(res=>{const i=new Image();i.onload=()=>res(true);i.onerror=()=>res(false);i.src=src}));
+ const ok=await Promise.all(imgs);
+ if(ok.every(Boolean)){loadState.textContent='场景已就绪';enter.disabled=false}else{loadState.textContent='部分场景加载失败 · 可继续播放';enter.disabled=false}
 }
-function segmentProgress(){
- if(currentSegment<0)return 0;
- let v=voices[currentSegment],local=(v.duration&&isFinite(v.duration))?clamp(v.currentTime/v.duration):0;
- return (currentSegment+local)/segments.length*100;
+preload();
+
+async function startFilm(){
+ if(started)return;started=true;ended=false;currentScene=-1;currentCaption=-1;seal.style.opacity=0;fade.style.opacity=0;replay.classList.remove('show');
+ createEnv();voice.currentTime=0;score.currentTime=0;
+ intro.style.opacity=0;setTimeout(()=>intro.style.display='none',1400);
+ try{await score.play();await voice.play()}catch(e){voice.play().catch(()=>{});score.play().catch(()=>{})}
 }
-function schedule(fn,ms){let id=setTimeout(fn,ms);timers.push(id);return id}
-function startSegment(i){
- if(!started||i>=segments.length){finishStory();return}
- currentSegment=i;setShot(segments[i].shot);showCaption(i);
- const v=voices[i];currentVoice=v;v.currentTime=0;v.playbackRate=segments[i].rate;v.volume=muted?0:.98;v.muted=muted;
- v.onended=()=>{currentVoice=null;caption.classList.remove('show');progress.style.width=((i+1)/segments.length*100)+'%';schedule(()=>startSegment(i+1),segments[i].gap*1000)};
- v.onerror=()=>{currentVoice=null;schedule(()=>startSegment(i+1),900)};
- v.play().catch(()=>{currentVoice=null;schedule(()=>startSegment(i+1),1000)});
-}
-function finishStory(){currentSegment=segments.length;progress.style.width='100%';caption.classList.remove('show');schedule(()=>{seal.style.opacity=1},800)}
-function ambient(){
- audioCtx=new(window.AudioContext||window.webkitAudioContext)();ambGain=audioCtx.createGain();ambGain.gain.value=.035;ambGain.connect(audioCtx.destination);
- let b=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
- let n=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter();n.buffer=b;n.loop=true;f.type='lowpass';f.frequency.value=430;n.connect(f).connect(ambGain);n.start()
-}
-function chime(){if(!audioCtx||muted)return;let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=392;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.035,audioCtx.currentTime+.05);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+4);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+4.1)}
-function mixMusic(){
- if(!started)return;
- let duck=(currentVoice && !currentVoice.paused) ? .42 : 1,i=currentSegment;
- let intro=.13,memory=.0,rise=.0;
- if(i>=5){intro=.07;memory=.095}
- if(i>=7){intro=.045;memory=.075;rise=.07}
- if(i>=11){intro=.018;memory=.02;rise=.025}
- if(i>=12){intro=.01;memory=.008;rise=.01}
- if(i>=13){intro=.022;memory=0;rise=0}
- music.intro.volume=muted?0:intro*duck;music.memory.volume=muted?0:memory*duck;music.rise.volume=muted?0:rise*duck;
- if(ambGain&&audioCtx)ambGain.gain.setTargetAtTime(muted?0:(i>=11?.017:.035),audioCtx.currentTime,.2);
- progress.style.width=segmentProgress()+'%';requestAnimationFrame(mixMusic)
-}
-document.querySelector('#enter').onclick=()=>{
- if(started)return;started=true;intro.style.opacity=0;setTimeout(()=>intro.remove(),1850);ambient();
- music.intro.currentTime=0;music.memory.currentTime=0;music.rise.currentTime=0;
- music.intro.play().catch(()=>{});music.memory.play().catch(()=>{});music.rise.play().catch(()=>{});
- requestAnimationFrame(mixMusic);schedule(()=>startSegment(0),700)
-};
-soundBtn.onclick=()=>{
- muted=!muted;soundBtn.textContent=muted?'声音关闭':'声音开启';voices.forEach(v=>v.muted=muted);Object.values(music).forEach(v=>v.muted=muted);
- if(ambGain&&audioCtx)ambGain.gain.setTargetAtTime(muted?0:.035,audioCtx.currentTime,.2)
-};
+enter.onclick=startFilm;
+sound.onclick=()=>{muted=!muted;sound.textContent=muted?'声音关闭':'声音开启';voice.muted=muted;score.muted=muted;if(env)env.gain.gain.setTargetAtTime(muted?0:.012,env.ac.currentTime,.2)};
+voice.onended=()=>{ended=true;sub.classList.remove('show');progress.style.width='100%';score.volume=.06;setTimeout(()=>{fade.style.opacity=.5;replay.classList.add('show')},2800)};
+replay.onclick=()=>{ended=false;started=true;currentScene=-1;currentCaption=-1;fade.style.opacity=0;seal.style.opacity=0;replay.classList.remove('show');voice.currentTime=0;score.currentTime=0;score.play().catch(()=>{});voice.play().catch(()=>{})};
 </script>
 </body>
 </html>
